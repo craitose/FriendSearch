@@ -7,119 +7,111 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
+  Image,
+  Modal,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ChatMessage } from '../components/ChatMessage';
+import { TypingIndicator } from '../components/TypingIndicator';
 import { ChatService } from '../services/chatService';
-import { Message } from '../types/chat';
+import { SocketService } from '../services/socketService';
+import { ImageService } from '../services/imageService';
+import { Message, ChatUser } from '../types/chat';
 import { AuthService } from '../services/authService';
 
-export const ChatScreen = ({ route }: any) => {
+export const ChatScreen = ({ route, navigation }: any) => {
   const { receiverId, receiverName } = route.params;
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [currentUserId, setCurrentUserId] = useState<string>('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [receiver, setReceiver] = useState<ChatUser | null>(null);
+  
   const flatListRef = useRef<FlatList>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const socketService = SocketService.getInstance();
 
   useEffect(() => {
-    loadCurrentUser();
-    loadMessages();
+    initializeChat();
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
   }, []);
 
-  const loadCurrentUser = async () => {
+  const initializeChat = async () => {
     const user = await AuthService.getUser();
     if (user) {
       setCurrentUserId(user.id);
+      await loadMessages();
+      setupSocketListeners();
     }
   };
 
-  const loadMessages = async () => {
-    const chatRoomId = getChatRoomId(currentUserId, receiverId);
-    const chatMessages = await ChatService.getMessages(chatRoomId);
-    setMessages(chatMessages);
+  const setupSocketListeners = () => {
+    socketService.setEventHandler('onMessageReceived', (message: Message) => {
+      if (message.senderId === receiverId) {
+        setMessages(prev => [...prev, message]);
+        markMessageAsRead(message.id);
+      }
+    });
+
+    socketService.setEventHandler('onTypingStart', (data) => {
+      if (data.userId === receiverId) {
+        setIsTyping(true);
+      }
+    });
+
+    socketService.setEventHandler('onTypingEnd', (data) => {
+      if (data.userId === receiverId) {
+        setIsTyping(false);
+      }
+    });
+
+    socketService.setEventHandler('onMessageRead', (data) => {
+      if (data.userId === receiverId) {
+        setMessages(prev =>
+          prev.map(msg =>
+            msg.id === data.messageId ? { ...msg, read: true, readAt: new Date() } : msg
+          )
+        );
+      }
+    });
+
+    socketService.setEventHandler('onUserOnlineStatus', (data) => {
+      if (data.userId === receiverId) {
+        setReceiver(prev => prev ? { ...prev, online: data.online } : null);
+      }
+    });
   };
 
-  const getChatRoomId = (user1Id: string, user2Id: string): string => {
-    return [user1Id, user2Id].sort().join('-');
+  const handleTyping = () => {
+    const roomId = getChatRoomId(currentUserId, receiverId);
+    socketService.sendTypingStart(roomId, currentUserId);
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      socketService.sendTypingEnd(roomId, currentUserId);
+    }, 1500);
   };
 
-  const handleSend = async () => {
-    if (!newMessage.trim()) return;
-
-    const message = await ChatService.sendMessage(
-      currentUserId,
-      receiverId,
-      newMessage.trim()
-    );
-
-    setMessages(prev => [...prev, message]);
-    setNewMessage('');
-    
-    // Scroll to bottom
-    flatListRef.current?.scrollToEnd();
+  const markMessageAsRead = (messageId: string) => {
+    socketService.markMessageAsRead(messageId, currentUserId);
   };
 
-  return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-    >
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <ChatMessage
-            message={item}
-            isOwnMessage={item.senderId === currentUserId}
-          />
-        )}
-        contentContainerStyle={styles.messagesList}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
-      />
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={newMessage}
-          onChangeText={setNewMessage}
-          placeholder="Type a message..."
-          multiline
-        />
-        <Pressable style={styles.sendButton} onPress={handleSend}>
-          <MaterialIcons name="send" size={24} color="#007AFF" />
-        </Pressable>
-      </View>
-    </KeyboardAvoidingView>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  messagesList: {
-    padding: 16,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    alignItems: 'center',
-  },
-  input: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 8,
-    maxHeight: 100,
-  },
-  sendButton: {
-    padding: 8,
-  },
-});
+  const handleImagePick = async () => {
+    const imageUri = await ImageService.pickImage();
+    if (imageUri) {
+      // In a real app, upload the image to a server and get the URL
+      const message: Message = {
+        id: Date.now().toString(),
+        senderId: currentUserId,
+        receiverId,
+        content: '',
+        timestamp: new Date(),
+        rea

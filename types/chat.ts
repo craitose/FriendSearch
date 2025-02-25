@@ -5,6 +5,9 @@ export interface Message {
   content: string;
   timestamp: Date;
   read: boolean;
+  readAt?: Date;
+  type: 'text' | 'image';
+  imageUrl?: string;
 }
 
 export interface ChatRoom {
@@ -12,4 +15,14 @@ export interface ChatRoom {
   participants: string[];
   lastMessage?: Message;
   updatedAt: Date;
+  typingUsers: string[];
+  unreadCount: number;
+}
+
+export interface ChatUser {
+  id: string;
+  name: string;
+  avatar?: string;
+  online: boolean;
+  lastSeen?: Date;
 }
