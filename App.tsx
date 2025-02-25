@@ -6,12 +6,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-// Simple Screen Components
-const LoginScreen = () => {
+// LoginScreen as a separate component with props
+const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome Back</Text>
-      <Pressable style={styles.button}>
+      <Pressable style={styles.button} onPress={onLogin}>
         <Text style={styles.buttonText}>Log In</Text>
       </Pressable>
     </View>
@@ -39,7 +39,6 @@ const ProfileScreen = () => (
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Bottom Tab Navigator
 const MainTabs = () => (
   <Tab.Navigator
     screenOptions={({ route }) => ({
@@ -69,12 +68,19 @@ const MainTabs = () => (
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
   return (
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {!isAuthenticated ? (
-            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen 
+              name="Login" 
+              component={(props) => <LoginScreen {...props} onLogin={handleLogin} />}
+            />
           ) : (
             <Stack.Screen name="Main" component={MainTabs} />
           )}
