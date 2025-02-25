@@ -15,11 +15,26 @@ export const LoginScreen = ({ navigation }: any) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const validateForm = () => {
+    if (!email.trim()) {
+      Alert.alert('Error', 'Email is required');
+      return false;
+    }
+    if (!password.trim()) {
+      Alert.alert('Error', 'Password is required');
+      return false;
+    }
+    return true;
+  };
+
   const handleLogin = async () => {
+    if (!validateForm()) return;
+
     try {
       setLoading(true);
+      // For testing purposes, accept any non-empty email/password
       await AuthService.login({ email, password });
-      // Navigation will be handled by the auth state change
+      // Navigation will be handled by the auth state change in App.tsx
     } catch (error) {
       Alert.alert('Error', 'Invalid credentials');
     } finally {
@@ -36,6 +51,8 @@ export const LoginScreen = ({ navigation }: any) => {
         value={email}
         onChangeText={setEmail}
         placeholder="Enter your email"
+        autoCapitalize="none"
+        keyboardType="email-address"
       />
 
       <FormInput
@@ -75,6 +92,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#fff',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 24,
