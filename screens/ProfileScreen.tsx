@@ -14,9 +14,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FormInput } from '../components/FormInput';
 import { Select } from '../components/Select';
 import { InterestTag } from '../components/InterestTag';
-import { MOCK_INTERESTS } from '../utils/mockData';
-import { ImageService } from '../services/imageService';
-import { AuthService } from '../services/authService';
-import { UserProfile } from '../types';
+// ... rest of the imports
 
-// ... rest of the code remains the same
+// ... rest of the component code
