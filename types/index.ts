@@ -3,7 +3,7 @@ export interface UserProfile {
   name: string;
   age: number;
   maritalStatus: 'single' | 'married' | 'divorced' | 'widowed';
-  orientation: string;
+  orientation: 'straight' | 'gay' | 'lesbian' | 'bisexual' | 'asexual' | 'other';
   interests: string[];
   location: {
     latitude: number;
@@ -11,12 +11,18 @@ export interface UserProfile {
   };
   bio: string;
   profileImage?: string;
+  searchPreferences: {
+    maxDistance: number;
+    ageRange: {
+      min: number;
+      max: number;
+    };
+    maritalStatuses: Array<'single' | 'married' | 'divorced' | 'widowed'>;
+    orientations: Array<'straight' | 'gay' | 'lesbian' | 'bisexual' | 'asexual' | 'other'>;
+  };
 }
 
-export interface Match {
-  id: string;
-  userId: string;
-  matchedUserId: string;
-  sharedInterests: string[];
-  distance: number; // in kilometers
+export interface ValidationError {
+  field: string;
+  message: string;
 }
