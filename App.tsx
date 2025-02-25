@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
-// Simple Login Screen Component
+// Simple Screen Components
 const LoginScreen = () => {
   return (
     <View style={styles.container}>
@@ -16,18 +18,66 @@ const LoginScreen = () => {
   );
 };
 
+const DiscoverScreen = () => (
+  <View style={styles.container}>
+    <Text style={styles.title}>Discover</Text>
+  </View>
+);
+
+const ChatScreen = () => (
+  <View style={styles.container}>
+    <Text style={styles.title}>Chat</Text>
+  </View>
+);
+
+const ProfileScreen = () => (
+  <View style={styles.container}>
+    <Text style={styles.title}>Profile</Text>
+  </View>
+);
+
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+// Bottom Tab Navigator
+const MainTabs = () => (
+  <Tab.Navigator
+    screenOptions={({ route }) => ({
+      tabBarIcon: ({ focused, color, size }) => {
+        let iconName: keyof typeof MaterialIcons.glyphMap = 'person';
+        
+        if (route.name === 'Discover') {
+          iconName = focused ? 'people' : 'people-outline';
+        } else if (route.name === 'Chat') {
+          iconName = focused ? 'chat' : 'chat-outline';
+        } else if (route.name === 'Profile') {
+          iconName = focused ? 'person' : 'person-outline';
+        }
+
+        return <MaterialIcons name={iconName} size={size} color={color} />;
+      },
+      tabBarActiveTintColor: '#007AFF',
+      tabBarInactiveTintColor: 'gray',
+    })}
+  >
+    <Tab.Screen name="Discover" component={DiscoverScreen} />
+    <Tab.Screen name="Chat" component={ChatScreen} />
+    <Tab.Screen name="Profile" component={ProfileScreen} />
+  </Tab.Navigator>
+);
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen 
-            name="Login" 
-            component={LoginScreen}
-            options={{ headerShown: false }}
-          />
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {!isAuthenticated ? (
+            <Stack.Screen name="Login" component={LoginScreen} />
+          ) : (
+            <Stack.Screen name="Main" component={MainTabs} />
+          )}
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
