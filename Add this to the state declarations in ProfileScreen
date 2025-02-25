@@ -1,0 +1,56 @@
+const [imageLoading, setImageLoading] = useState(false);
+
+// Update the handleImagePick function
+const handleImagePick = async () => {
+  try {
+    setImageLoading(true);
+    const imageUri = await ImageService.pickImage();
+    if (imageUri) {
+      // Resize the image before setting it
+      const resizedUri = await ImageService.resizeImage(imageUri);
+      setProfile(prev => ({
+        ...prev,
+        profileImage: resizedUri,
+      }));
+    }
+  } catch (error) {
+    Alert.alert('Error', 'Failed to pick image');
+  } finally {
+    setImageLoading(false);
+  }
+};
+
+// Update the profile image section in the render
+<View style={styles.header}>
+  <Pressable 
+    style={styles.profileImageContainer} 
+    onPress={handleImagePick}
+    disabled={imageLoading}
+  >
+    {imageLoading ? (
+      <View style={styles.profileImagePlaceholder}>
+        <ActivityIndicator color="#007AFF" />
+      </View>
+    ) : profile.profileImage ? (
+      <Image
+        source={{ uri: profile.profileImage }}
+        style={styles.profileImage}
+        onError={() => {
+          Alert.alert('Error', 'Failed to load image');
+          setProfile(prev => ({ ...prev, profileImage: undefined }));
+        }}
+      />
+    ) : (
+      <View style={styles.profileImagePlaceholder}>
+        <MaterialIcons name="person" size={40} color="#666" />
+      </View>
+    )}
+    <View style={styles.editIconContainer}>
+      <MaterialIcons 
+        name={imageLoading ? "hourglass-empty" : "edit"} 
+        size={16} 
+        color="#fff" 
+      />
+    </View>
+  </Pressable>
+</View>
