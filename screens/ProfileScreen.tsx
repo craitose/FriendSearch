@@ -1,27 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, View, Alert } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { FormInput } from '../components/FormInput';
 import { Select } from '../components/Select';
 import { InterestTag } from '../components/InterestTag';
 import { MOCK_INTERESTS } from '../utils/mockData';
-import { getCurrentLocation } from '../utils/locationService';
-import { UserProfile, ValidationError } from '../types';
-
-const MARITAL_STATUS_OPTIONS = [
-  { label: 'Single', value: 'single' },
-  { label: 'Married', value: 'married' },
-  { label: 'Divorced', value: 'divorced' },
-  { label: 'Widowed', value: 'widowed' },
-];
-
-const ORIENTATION_OPTIONS = [
-  { label: 'Straight', value: 'straight' },
-  { label: 'Gay', value: 'gay' },
-  { label: 'Lesbian', value: 'lesbian' },
-  { label: 'Bisexual', value: 'bisexual' },
-  { label: 'Asexual', value: 'asexual' },
-  { label: 'Other', value: 'other' },
-];
+import { ImageService } from '../services/imageService';
+import { AuthService } from '../services/authService';
+import { UserProfile } from '../types';
 
 export const ProfileScreen = () => {
   const [profile, setProfile] = useState<Partial<UserProfile>>({
@@ -31,68 +25,40 @@ export const ProfileScreen = () => {
     orientation: undefined,
     interests: [],
     bio: '',
-    searchPreferences: {
-      maxDistance: 50,
-      ageRange: { min: 18, max: 100 },
-      maritalStatuses: [],
-      orientations: [],
-    },
+    profileImage: undefined,
   });
-
-  const [errors, setErrors] = useState<ValidationError[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    initializeLocation();
+    loadProfile();
   }, []);
 
-  const initializeLocation = async () => {
-    const location = await getCurrentLocation();
-    if (location) {
-      setProfile(prev => ({
-        ...prev,
-        location: {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        },
-      }));
+  const loadProfile = async () => {
+    try {
+      const userData = await AuthService.getUser();
+      if (userData) {
+        setProfile(userData);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to load profile');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const validateProfile = (): ValidationError[] => {
-    const newErrors: ValidationError[] = [];
-
-    if (!profile.name?.trim()) {
-      newErrors.push({ field: 'name', message: 'Name is required' });
+  const handleImagePick = async () => {
+    try {
+      const imageUri = await ImageService.pickImage();
+      if (imageUri) {
+        setProfile(prev => ({
+          ...prev,
+          profileImage: imageUri,
+        }));
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to pick image');
     }
-
-    if (!profile.age || profile.age < 18) {
-      newErrors.push({ field: 'age', message: 'Must be 18 or older' });
-    }
-
-    if (!profile.maritalStatus) {
-      newErrors.push({ field: 'maritalStatus', message: 'Marital status is required' });
-    }
-
-    if (!profile.orientation) {
-      newErrors.push({ field: 'orientation', message: 'Orientation is required' });
-    }
-
-    if (!profile.interests || profile.interests.length === 0) {
-      newErrors.push({ field: 'interests', message: 'Select at least one interest' });
-    }
-
-    return newErrors;
-  };
-
-  const handleSave = () => {
-    const validationErrors = validateProfile();
-    if (validationErrors.length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    // Here we would save the profile to the backend
-    Alert.alert('Success', 'Profile saved successfully');
   };
 
   const toggleInterest = (interest: string) => {
@@ -104,85 +70,143 @@ export const ProfileScreen = () => {
     }));
   };
 
-  const getError = (field: string) => {
-    return errors.find(error => error.field === field)?.message;
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      // In a real app, this would send the updated profile to a backend
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      Alert.alert('Success', 'Profile updated successfully');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  const handleLogout = async () => {
+    try {
+      await AuthService.logout();
+      // Navigation will be handled by the auth state change in App.tsx
+    } catch (error) {
+      Alert.alert('Error', 'Failed to logout');
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Pressable style={styles.profileImageContainer} onPress={handleImagePick}>
+          {profile.profileImage ? (
+            <Image
+              source={{ uri: profile.profileImage }}
+              style={styles.profileImage}
+            />
+          ) : (
+            <View style={styles.profileImagePlaceholder}>
+              <MaterialIcons name="person" size={40} color="#666" />
+            </View>
+          )}
+          <View style={styles.editIconContainer}>
+            <MaterialIcons name="edit" size={16} color="#fff" />
+          </View>
+        </Pressable>
+      </View>
+
       <View style={styles.content}>
         <FormInput
           label="Name"
-          value={profile.name || ''}
+          value={profile.name}
           onChangeText={(text) => setProfile(prev => ({ ...prev, name: text }))}
-          error={getError('name')}
           placeholder="Enter your name"
         />
 
         <FormInput
           label="Age"
-          value={profile.age?.toString() || ''}
+          value={profile.age?.toString()}
           onChangeText={(text) => {
             const age = parseInt(text);
             if (!isNaN(age) || text === '') {
               setProfile(prev => ({ ...prev, age: age || undefined }));
             }
           }}
-          error={getError('age')}
           placeholder="Enter your age"
+          keyboardType="numeric"
         />
 
         <Select
           label="Marital Status"
           value={profile.maritalStatus || ''}
-          options={MARITAL_STATUS_OPTIONS}
+          options={[
+            { label: 'Single', value: 'single' },
+            { label: 'Married', value: 'married' },
+            { label: 'Divorced', value: 'divorced' },
+            { label: 'Widowed', value: 'widowed' },
+          ]}
           onChange={(value) => setProfile(prev => ({ ...prev, maritalStatus: value as any }))}
-          error={getError('maritalStatus')}
         />
 
         <Select
           label="Orientation"
           value={profile.orientation || ''}
-          options={ORIENTATION_OPTIONS}
+          options={[
+            { label: 'Straight', value: 'straight' },
+            { label: 'Gay', value: 'gay' },
+            { label: 'Lesbian', value: 'lesbian' },
+            { label: 'Bisexual', value: 'bisexual' },
+            { label: 'Asexual', value: 'asexual' },
+            { label: 'Other', value: 'other' },
+          ]}
           onChange={(value) => setProfile(prev => ({ ...prev, orientation: value as any }))}
-          error={getError('orientation')}
         />
 
-        <View style={styles.interestsSection}>
-          <FormInput
-            label="Bio"
-            value={profile.bio || ''}
-            onChangeText={(text) => setProfile(prev => ({ ...prev, bio: text }))}
-            multiline
-            placeholder="Tell us about yourself..."
-          />
+        <Text style={styles.sectionTitle}>Interests</Text>
+        <View style={styles.interestsContainer}>
+          {MOCK_INTERESTS.map((interest) => (
+            <Pressable
+              key={interest}
+              onPress={() => toggleInterest(interest)}
+            >
+              <InterestTag
+                interest={interest}
+                selected={profile.interests?.includes(interest)}
+              />
+            </Pressable>
+          ))}
         </View>
 
-        <View style={styles.interestsSection}>
-          <Text style={styles.sectionTitle}>Interests</Text>
-          {getError('interests') && (
-            <Text style={styles.errorText}>{getError('interests')}</Text>
-          )}
-          <View style={styles.interestsContainer}>
-            {MOCK_INTERESTS.map((interest) => (
-              <Pressable
-                key={interest}
-                onPress={() => toggleInterest(interest)}
-              >
-                <InterestTag
-                  interest={interest}
-                  selected={profile.interests?.includes(interest)}
-                />
-              </Pressable>
-            ))}
-          </View>
-        </View>
+        <FormInput
+          label="Bio"
+          value={profile.bio}
+          onChangeText={(text) => setProfile(prev => ({ ...prev, bio: text }))}
+          placeholder="Tell us about yourself..."
+          multiline
+        />
 
         <Pressable
           style={styles.saveButton}
           onPress={handleSave}
+          disabled={saving}
         >
-          <Text style={styles.saveButtonText}>Save Profile</Text>
+          {saving ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.saveButtonText}>Save Profile</Text>
+          )}
+        </Pressable>
+
+        <Pressable
+          style={styles.logoutButton}
+          onPress={handleLogout}
+        >
+          <Text style={styles.logoutButtonText}>Logout</Text>
         </Pressable>
       </View>
     </ScrollView>
@@ -192,29 +216,61 @@ export const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  profileImageContainer: {
+    position: 'relative',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    overflow: 'hidden',
+  },
+  profileImage: {
+    width: '100%',
+    height: '100%',
+  },
+  profileImagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  editIconContainer: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#007AFF',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   content: {
-    padding: 16,
-  },
-  interestsSection: {
-    marginBottom: 24,
+    padding: 20,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 12,
-    color: '#333',
+    marginTop: 16,
+    marginBottom: 8,
   },
   interestsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 8,
-  },
-  errorText: {
-    color: '#ff3b30',
-    fontSize: 14,
-    marginBottom: 8,
+    marginBottom: 16,
   },
   saveButton: {
     backgroundColor: '#007AFF',
@@ -224,6 +280,18 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  logoutButton: {
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    backgroundColor: '#ff3b30',
+  },
+  logoutButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
