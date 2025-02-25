@@ -10,6 +10,7 @@ import { View, ActivityIndicator } from 'react-native';
 import { DiscoveryScreen } from './screens/DiscoveryScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
 import { LoginScreen } from './screens/auth/LoginScreen';
+import { RegisterScreen } from './screens/auth/RegisterScreen';
 import { ChatListScreen } from './screens/ChatListScreen';
 import { ChatScreen } from './screens/ChatScreen';
 import { AuthService } from './services/authService';
@@ -52,15 +53,25 @@ const MainTabs = () => (
 
         return <MaterialIcons name={iconName} size={size} color={color} />;
       },
+      tabBarActiveTintColor: '#007AFF',
+      tabBarInactiveTintColor: 'gray',
     })}
   >
-    <Tab.Screen name="Discover" component={DiscoveryScreen} />
+    <Tab.Screen 
+      name="Discover" 
+      component={DiscoveryScreen}
+      options={{ title: 'Discover' }}
+    />
     <Tab.Screen 
       name="Chat" 
       component={ChatStackNavigator} 
       options={{ headerShown: false }} 
     />
-    <Tab.Screen name="Profile" component={ProfileScreen} />
+    <Tab.Screen 
+      name="Profile" 
+      component={ProfileScreen}
+      options={{ title: 'Profile' }}
+    />
   </Tab.Navigator>
 );
 
@@ -97,10 +108,13 @@ export default function App() {
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-          {isAuthenticated ? (
-            <Stack.Screen name="Main" component={MainTabs} />
+          {!isAuthenticated ? (
+            <>
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Register" component={RegisterScreen} />
+            </>
           ) : (
-            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Main" component={MainTabs} />
           )}
         </Stack.Navigator>
       </NavigationContainer>
