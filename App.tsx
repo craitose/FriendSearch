@@ -1,37 +1,9 @@
-// ... (previous imports remain the same)
+import React, { useState, useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { MaterialIcons } from '@expo/vector-icons';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { View, ActivityIndicator } from 'react-native';
 
-export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    initializeApp();
-    // Set up an auth state listener
-    const authStateListener = setInterval(checkAuthState, 1000);
-    return () => clearInterval(authStateListener);
-  }, []);
-
-  const checkAuthState = async () => {
-    try {
-      const token = await AuthService.getToken();
-      setIsAuthenticated(!!token);
-    } catch (error) {
-      console.error('Error checking auth state:', error);
-      setIsAuthenticated(false);
-    }
-  };
-
-  const initializeApp = async () => {
-    try {
-      // Initialize notifications
-      await NotificationService.initialize();
-      
-      // Check authentication status
-      await checkAuthState();
-    } catch (error) {
-      console.error('Error initializing app:', error);
-      setIsAuthenticated(false);
-    }
-  };
-
-  // ... (rest of the component remains the same)
-}
+// ... rest of the code remains the same

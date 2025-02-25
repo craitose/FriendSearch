@@ -21,8 +21,3 @@ export interface UserProfile {
     orientations: Array<'straight' | 'gay' | 'lesbian' | 'bisexual' | 'asexual' | 'other'>;
   };
 }
-
-export interface ValidationError {
-  field: string;
-  message: string;
-}
