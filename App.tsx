@@ -16,7 +16,18 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-// Login Screen with form fields
+// Define the navigator types first
+type RootStackParamList = {
+  Login: undefined;
+  Register: undefined;
+  Main: undefined;
+};
+
+// Create the navigators before using them
+const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator();
+
+// Login Screen Component
 const LoginScreen = ({ onLogin, navigation }: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +37,6 @@ const LoginScreen = ({ onLogin, navigation }: any) => {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-    // For demo purposes, accept any non-empty input
     onLogin();
   };
 
@@ -80,7 +90,7 @@ const LoginScreen = ({ onLogin, navigation }: any) => {
   );
 };
 
-// Register Screen
+// Register Screen Component
 const RegisterScreen = ({ onLogin, navigation }: any) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -102,7 +112,6 @@ const RegisterScreen = ({ onLogin, navigation }: any) => {
       return;
     }
 
-    // For demo purposes, accept any valid form submission
     onLogin();
   };
 
@@ -177,8 +186,53 @@ const RegisterScreen = ({ onLogin, navigation }: any) => {
   );
 };
 
-// ... (Keep existing Tab Navigator and Screen components)
+// Tab Screens
+const DiscoverScreen = () => (
+  <View style={styles.container}>
+    <Text style={styles.title}>Discover</Text>
+  </View>
+);
 
+const ChatScreen = () => (
+  <View style={styles.container}>
+    <Text style={styles.title}>Chat</Text>
+  </View>
+);
+
+const ProfileScreen = () => (
+  <View style={styles.container}>
+    <Text style={styles.title}>Profile</Text>
+  </View>
+);
+
+// Main Tab Navigator
+const MainTabs = () => (
+  <Tab.Navigator
+    screenOptions={({ route }) => ({
+      tabBarIcon: ({ focused, color, size }) => {
+        let iconName: keyof typeof MaterialIcons.glyphMap = 'person';
+        
+        if (route.name === 'Discover') {
+          iconName = focused ? 'people' : 'people-outline';
+        } else if (route.name === 'Chat') {
+          iconName = focused ? 'chat' : 'chat-outline';
+        } else if (route.name === 'Profile') {
+          iconName = focused ? 'person' : 'person-outline';
+        }
+
+        return <MaterialIcons name={iconName} size={size} color={color} />;
+      },
+      tabBarActiveTintColor: '#007AFF',
+      tabBarInactiveTintColor: 'gray',
+    })}
+  >
+    <Tab.Screen name="Discover" component={DiscoverScreen} />
+    <Tab.Screen name="Chat" component={ChatScreen} />
+    <Tab.Screen name="Profile" component={ProfileScreen} />
+  </Tab.Navigator>
+);
+
+// Main App Component
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
