@@ -7,13 +7,15 @@ import {
   Pressable, 
   Image,
   Modal,
-  Alert
+  Alert,
+  TouchableOpacity
 } from 'react-native';
 
 function DiscoveryScreen({ navigation }) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [filterDistance, setFilterDistance] = useState(50); // Default max distance: 50km
+  const [connectedUsers, setConnectedUsers] = useState([]);
 
   // Hardcoded user data with more details
   const users = [
@@ -78,6 +80,15 @@ function DiscoveryScreen({ navigation }) {
   const filteredUsers = users.filter(user => user.distance <= filterDistance);
 
   const handleConnect = (user) => {
+    // Stop event propagation
+    if (connectedUsers.includes(user.id)) {
+      Alert.alert(
+        "Already Connected",
+        `You are already connected with ${user.name}.`
+      );
+      return;
+    }
+    
     Alert.alert(
       "Connection Request",
       `Would you like to connect with ${user.name}?`,
@@ -89,6 +100,8 @@ function DiscoveryScreen({ navigation }) {
         { 
           text: "Connect", 
           onPress: () => {
+            // Add user to connected users
+            setConnectedUsers([...connectedUsers, user.id]);
             Alert.alert("Success", `Connection request sent to ${user.name}!`);
           }
         }
@@ -101,49 +114,60 @@ function DiscoveryScreen({ navigation }) {
     setShowModal(true);
   };
 
-  const renderUserCard = (user) => (
-    <Pressable 
-      key={user.id} 
-      style={styles.card}
-      onPress={() => openUserDetails(user)}
-    >
-      <View style={styles.cardHeader}>
-        <Image 
-          source={{ uri: user.profileImage }} 
-          style={styles.profileImage} 
-        />
-        <View style={styles.userInfo}>
-          <Text style={styles.name}>{user.name}, {user.age}</Text>
-          <Text style={styles.distance}>{user.distance} km away</Text>
-          <Text style={styles.statusInfo}>
-            {user.maritalStatus} • {user.orientation}
+  const renderUserCard = (user) => {
+    const isConnected = connectedUsers.includes(user.id);
+    
+    return (
+      <View key={user.id} style={styles.card}>
+        <TouchableOpacity 
+          style={styles.cardContent}
+          onPress={() => openUserDetails(user)}
+          activeOpacity={0.8}
+        >
+          <View style={styles.cardHeader}>
+            <Image 
+              source={{ uri: user.profileImage }} 
+              style={styles.profileImage} 
+            />
+            <View style={styles.userInfo}>
+              <Text style={styles.name}>{user.name}, {user.age}</Text>
+              <Text style={styles.distance}>{user.distance} km away</Text>
+              <Text style={styles.statusInfo}>
+                {user.maritalStatus} • {user.orientation}
+              </Text>
+            </View>
+          </View>
+          
+          <Text style={styles.bio} numberOfLines={2}>{user.bio}</Text>
+          
+          <View style={styles.interestsContainer}>
+            {user.interests.slice(0, 3).map(interest => (
+              <View key={interest} style={styles.interestTag}>
+                <Text style={styles.interestTagText}>{interest}</Text>
+              </View>
+            ))}
+            {user.interests.length > 3 && (
+              <View style={styles.interestTag}>
+                <Text style={styles.interestTagText}>+{user.interests.length - 3}</Text>
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[
+            styles.connectButton,
+            isConnected && styles.connectedButton
+          ]}
+          onPress={() => handleConnect(user)}
+        >
+          <Text style={styles.connectButtonText}>
+            {isConnected ? 'Connected' : 'Connect'}
           </Text>
-        </View>
+        </TouchableOpacity>
       </View>
-      
-      <Text style={styles.bio} numberOfLines={2}>{user.bio}</Text>
-      
-      <View style={styles.interestsContainer}>
-        {user.interests.slice(0, 3).map(interest => (
-          <View key={interest} style={styles.interestTag}>
-            <Text style={styles.interestTagText}>{interest}</Text>
-          </View>
-        ))}
-        {user.interests.length > 3 && (
-          <View style={styles.interestTag}>
-            <Text style={styles.interestTagText}>+{user.interests.length - 3}</Text>
-          </View>
-        )}
-      </View>
-      
-      <Pressable 
-        style={styles.connectButton}
-        onPress={() => handleConnect(user)}
-      >
-        <Text style={styles.connectButtonText}>Connect</Text>
-      </Pressable>
-    </Pressable>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -152,42 +176,54 @@ function DiscoveryScreen({ navigation }) {
         <View style={styles.filterContainer}>
           <Text style={styles.filterLabel}>Max Distance:</Text>
           <View style={styles.filterOptions}>
-            <Pressable
+            <TouchableOpacity
               style={[
                 styles.filterOption,
                 filterDistance === 5 && styles.filterOptionSelected
               ]}
               onPress={() => setFilterDistance(5)}
             >
-              <Text style={styles.filterOptionText}>5km</Text>
-            </Pressable>
-            <Pressable
+              <Text style={[
+                styles.filterOptionText,
+                filterDistance === 5 && styles.filterOptionTextSelected
+              ]}>5km</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
               style={[
                 styles.filterOption,
                 filterDistance === 10 && styles.filterOptionSelected
               ]}
               onPress={() => setFilterDistance(10)}
             >
-              <Text style={styles.filterOptionText}>10km</Text>
-            </Pressable>
-            <Pressable
+              <Text style={[
+                styles.filterOptionText,
+                filterDistance === 10 && styles.filterOptionTextSelected
+              ]}>10km</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
               style={[
                 styles.filterOption,
                 filterDistance === 25 && styles.filterOptionSelected
               ]}
               onPress={() => setFilterDistance(25)}
             >
-              <Text style={styles.filterOptionText}>25km</Text>
-            </Pressable>
-            <Pressable
+              <Text style={[
+                styles.filterOptionText,
+                filterDistance === 25 && styles.filterOptionTextSelected
+              ]}>25km</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
               style={[
                 styles.filterOption,
                 filterDistance === 50 && styles.filterOptionSelected
               ]}
               onPress={() => setFilterDistance(50)}
             >
-              <Text style={styles.filterOptionText}>50km</Text>
-            </Pressable>
+              <Text style={[
+                styles.filterOptionText,
+                filterDistance === 50 && styles.filterOptionTextSelected
+              ]}>50km</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -239,21 +275,26 @@ function DiscoveryScreen({ navigation }) {
                 </View>
                 
                 <View style={styles.modalButtons}>
-                  <Pressable 
+                  <TouchableOpacity 
                     style={styles.closeButton}
                     onPress={() => setShowModal(false)}
                   >
                     <Text style={styles.closeButtonText}>Close</Text>
-                  </Pressable>
-                  <Pressable 
-                    style={styles.modalConnectButton}
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[
+                      styles.modalConnectButton,
+                      connectedUsers.includes(selectedUser.id) && styles.connectedButton
+                    ]}
                     onPress={() => {
                       setShowModal(false);
                       handleConnect(selectedUser);
                     }}
                   >
-                    <Text style={styles.connectButtonText}>Connect</Text>
-                  </Pressable>
+                    <Text style={styles.connectButtonText}>
+                      {connectedUsers.includes(selectedUser.id) ? 'Connected' : 'Connect'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </>
             )}
@@ -305,6 +346,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
+  filterOptionTextSelected: {
+    color: '#fff',
+  },
   scrollView: {
     flex: 1,
     padding: 16,
@@ -319,6 +363,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+  },
+  cardContent: {
+    marginBottom: 12,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -374,6 +421,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 8,
     alignItems: 'center',
+  },
+  connectedButton: {
+    backgroundColor: '#4CD964',
   },
   connectButtonText: {
     color: '#fff',
