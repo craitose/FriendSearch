@@ -1,0 +1,1 @@
+import DiscoveryScreen from './screens/DiscoveryScreen';
