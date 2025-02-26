@@ -2,7 +2,12 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  StyleSheet as RNStyleSheet 
+} from 'react-native';
 
 // Import screens
 import DiscoveryScreen from './screens/DiscoveryScreen';
@@ -67,7 +72,8 @@ export default function App() {
   );
 }
 
-const styles = StyleSheet.create({
+// Define styles using the imported StyleSheet
+const styles = RNStyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
