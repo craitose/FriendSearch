@@ -7,8 +7,7 @@ import {
   TouchableOpacity, 
   Image,
   Modal,
-  Alert,
-  Button
+  Alert
 } from 'react-native';
 
 function DiscoveryScreen({ navigation }) {
@@ -59,25 +58,29 @@ function DiscoveryScreen({ navigation }) {
 
   // Function to handle connecting with a user
   const connectWithUser = (userId) => {
+    console.log("Connecting with user:", userId);
+    
     if (connectedUsers.includes(userId)) {
       Alert.alert("Already Connected", "You are already connected with this user.");
     } else {
       const user = users.find(u => u.id === userId);
-      Alert.alert(
-        "Connect with User",
-        `Would you like to connect with ${user.name}?`,
-        [
-          { text: "Cancel", style: "cancel" },
-          { 
-            text: "Connect", 
-            onPress: () => {
-              const newConnectedUsers = [...connectedUsers, userId];
-              setConnectedUsers(newConnectedUsers);
-              Alert.alert("Success", `Connection request sent to ${user.name}!`);
+      if (user) {
+        Alert.alert(
+          "Connect with User",
+          `Would you like to connect with ${user.name}?`,
+          [
+            { text: "Cancel", style: "cancel" },
+            { 
+              text: "Connect", 
+              onPress: () => {
+                console.log("User confirmed connection");
+                setConnectedUsers([...connectedUsers, userId]);
+                Alert.alert("Success", `Connection request sent to ${user.name}!`);
+              }
             }
-          }
-        ]
-      );
+          ]
+        );
+      }
     }
   };
 
@@ -136,11 +139,20 @@ function DiscoveryScreen({ navigation }) {
               </View>
             </TouchableOpacity>
             
-            <Button
-              title={connectedUsers.includes(user.id) ? "Connected" : "Connect"}
-              onPress={() => connectWithUser(user.id)}
-              color={connectedUsers.includes(user.id) ? "#4CD964" : "#007AFF"}
-            />
+            <TouchableOpacity
+              style={[
+                styles.standardButton,
+                connectedUsers.includes(user.id) ? styles.connectedButton : styles.connectButton
+              ]}
+              onPress={() => {
+                console.log("Connect button pressed for user:", user.id);
+                connectWithUser(user.id);
+              }}
+            >
+              <Text style={styles.buttonText}>
+                {connectedUsers.includes(user.id) ? "Connected" : "Connect"}
+              </Text>
+            </TouchableOpacity>
           </View>
         ))}
       </ScrollView>
@@ -178,16 +190,27 @@ function DiscoveryScreen({ navigation }) {
                 </View>
                 
                 <View style={styles.modalButtons}>
-                  <Button
-                    title="Close"
+                  <TouchableOpacity 
+                    style={styles.closeButton}
                     onPress={() => setShowModal(false)}
-                    color="#999"
-                  />
-                  <Button
-                    title={connectedUsers.includes(selectedUser.id) ? "Connected" : "Connect"}
-                    onPress={() => connectWithUser(selectedUser.id)}
-                    color={connectedUsers.includes(selectedUser.id) ? "#4CD964" : "#007AFF"}
-                  />
+                  >
+                    <Text style={styles.closeButtonText}>Close</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={[
+                      styles.standardButton,
+                      connectedUsers.includes(selectedUser.id) ? styles.connectedButton : styles.connectButton
+                    ]}
+                    onPress={() => {
+                      console.log("Modal connect button pressed for user:", selectedUser.id);
+                      connectWithUser(selectedUser.id);
+                    }}
+                  >
+                    <Text style={styles.buttonText}>
+                      {connectedUsers.includes(selectedUser.id) ? "Connected" : "Connect"}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </>
             )}
@@ -300,6 +323,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
+  standardButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  connectButton: {
+    backgroundColor: '#007AFF',
+  },
+  connectedButton: {
+    backgroundColor: '#4CD964',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -346,6 +387,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
+  },
+  closeButton: {
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    flex: 1,
+    marginRight: 10,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    fontSize: 16,
+    color: '#333',
   },
 });
 
