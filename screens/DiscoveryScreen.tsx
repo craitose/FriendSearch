@@ -4,11 +4,10 @@ import {
   Text, 
   StyleSheet, 
   ScrollView, 
-  Pressable, 
+  TouchableOpacity, 
   Image,
   Modal,
-  Alert,
-  TouchableOpacity
+  Alert
 } from 'react-native';
 
 function DiscoveryScreen({ navigation }) {
@@ -79,19 +78,18 @@ function DiscoveryScreen({ navigation }) {
   // Filter users by distance
   const filteredUsers = users.filter(user => user.distance <= filterDistance);
 
-  const handleConnect = (user) => {
-    // Stop event propagation
-    if (connectedUsers.includes(user.id)) {
+  const handleConnect = (userId, userName) => {
+    if (connectedUsers.includes(userId)) {
       Alert.alert(
         "Already Connected",
-        `You are already connected with ${user.name}.`
+        `You are already connected with ${userName}.`
       );
       return;
     }
     
     Alert.alert(
       "Connection Request",
-      `Would you like to connect with ${user.name}?`,
+      `Would you like to connect with ${userName}?`,
       [
         {
           text: "Cancel",
@@ -101,8 +99,8 @@ function DiscoveryScreen({ navigation }) {
           text: "Connect", 
           onPress: () => {
             // Add user to connected users
-            setConnectedUsers([...connectedUsers, user.id]);
-            Alert.alert("Success", `Connection request sent to ${user.name}!`);
+            setConnectedUsers(prev => [...prev, userId]);
+            Alert.alert("Success", `Connection request sent to ${userName}!`);
           }
         }
       ]
@@ -112,6 +110,11 @@ function DiscoveryScreen({ navigation }) {
   const openUserDetails = (user) => {
     setSelectedUser(user);
     setShowModal(true);
+  };
+
+  const handleCardConnect = (e, userId, userName) => {
+    e.stopPropagation(); // Prevent the card from opening
+    handleConnect(userId, userName);
   };
 
   const renderUserCard = (user) => {
@@ -159,7 +162,7 @@ function DiscoveryScreen({ navigation }) {
             styles.connectButton,
             isConnected && styles.connectedButton
           ]}
-          onPress={() => handleConnect(user)}
+          onPress={(e) => handleCardConnect(e, user.id, user.name)}
         >
           <Text style={styles.connectButtonText}>
             {isConnected ? 'Connected' : 'Connect'}
@@ -287,8 +290,7 @@ function DiscoveryScreen({ navigation }) {
                       connectedUsers.includes(selectedUser.id) && styles.connectedButton
                     ]}
                     onPress={() => {
-                      setShowModal(false);
-                      handleConnect(selectedUser);
+                      handleConnect(selectedUser.id, selectedUser.name);
                     }}
                   >
                     <Text style={styles.connectButtonText}>
