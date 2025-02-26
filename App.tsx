@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 // Import screens
 import DiscoveryScreen from './screens/DiscoveryScreen';
@@ -11,20 +11,14 @@ import ProfileScreen from './screens/ProfileScreen';
 // Simple Login Screen Component
 const LoginScreen = ({ navigation }) => {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>Welcome Back</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Welcome Back</Text>
       
       <TouchableOpacity 
-        style={{ 
-          backgroundColor: '#007AFF', 
-          paddingVertical: 12, 
-          paddingHorizontal: 32, 
-          borderRadius: 8,
-          marginTop: 20,
-        }}
+        style={styles.button}
         onPress={() => navigation.navigate('Main')}
       >
-        <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Log In</Text>
+        <Text style={styles.buttonText}>Log In</Text>
       </TouchableOpacity>
     </View>
   );
@@ -33,8 +27,8 @@ const LoginScreen = ({ navigation }) => {
 // Simple Chat Screen Component
 const ChatScreen = () => {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Chat Screen</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Chat Screen</Text>
     </View>
   );
 };
@@ -80,3 +74,29 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 32,
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
