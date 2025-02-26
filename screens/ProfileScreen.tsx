@@ -144,8 +144,20 @@ export const ProfileScreen = ({ navigation, onLogout }: any) => {
         { 
           text: 'Logout', 
           style: 'destructive',
-          onPress: () => {
-            if (onLogout) onLogout();
+          onPress: async () => {
+            try {
+              // Clear profile data
+              await AsyncStorage.removeItem('@user_profile');
+              // Call the logout function passed from App.tsx
+              if (onLogout) {
+                onLogout();
+              } else {
+                console.error('onLogout function not provided');
+              }
+            } catch (error) {
+              console.error('Error during logout:', error);
+              Alert.alert('Error', 'Failed to logout. Please try again.');
+            }
           }
         },
       ]
