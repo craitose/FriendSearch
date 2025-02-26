@@ -1,0 +1,58 @@
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+
+export default function App() {
+  // Hardcoded user data
+  const user = {
+    name: 'Sarah Johnson',
+    age: 28,
+    distance: 2.5,
+    bio: 'Passionate photographer looking for hiking buddies.',
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Adult Friend Finder</Text>
+      
+      <View style={styles.card}>
+        <Text style={styles.name}>{user.name}, {user.age}</Text>
+        <Text style={styles.distance}>{user.distance} km away</Text>
+        <Text style={styles.bio}>{user.bio}</Text>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 30,
+  },
+  card: {
+    width: '100%',
+    padding: 20,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  distance: {
+    marginTop: 5,
+    color: '#666',
+  },
+  bio: {
+    marginTop: 10,
+    textAlign: 'center',
+  },
+});
