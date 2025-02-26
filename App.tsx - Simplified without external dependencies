@@ -1,0 +1,347 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  TextInput,
+  ScrollView,
+  Alert,
+} from 'react-native';
+
+// Main App Component
+export default function App() {
+  const [currentScreen, setCurrentScreen] = useState('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // Mock user data for discovery
+  const users = [
+    {
+      id: '1',
+      name: 'Sarah Johnson',
+      age: 28,
+      distance: 2.5,
+      bio: 'Passionate photographer looking for hiking buddies.',
+      interests: ['Hiking', 'Photography', 'Travel'],
+    },
+    {
+      id: '2',
+      name: 'Michael Chen',
+      age: 34,
+      distance: 4.8,
+      bio: 'Tech enthusiast and gamer looking for friends.',
+      interests: ['Gaming', 'Movies', 'Technology'],
+    },
+    {
+      id: '3',
+      name: 'Emily Rodriguez',
+      age: 31,
+      distance: 1.2,
+      bio: 'Foodie and art lover seeking creative friends.',
+      interests: ['Cooking', 'Art', 'Music'],
+    },
+  ];
+
+  const handleLogin = () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+    setCurrentScreen('discover');
+  };
+
+  const handleLogout = () => {
+    setCurrentScreen('login');
+  };
+
+  // Render login screen
+  if (currentScreen === 'login') {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Adult Friend Finder</Text>
+        <Text style={styles.subtitle}>Connect with like-minded adults</Text>
+        
+        <View style={styles.form}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Enter your email"
+            autoCapitalize="none"
+          />
+          
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Enter your password"
+            secureTextEntry
+          />
+          
+          <Pressable style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Log In</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
+  // Render discovery screen
+  if (currentScreen === 'discover') {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Discover Friends</Text>
+        </View>
+        
+        <ScrollView style={styles.scrollView}>
+          {users.map(user => (
+            <View key={user.id} style={styles.card}>
+              <Text style={styles.cardTitle}>{user.name}, {user.age}</Text>
+              <Text style={styles.cardSubtitle}>{user.distance} km away</Text>
+              <Text style={styles.cardText}>{user.bio}</Text>
+              
+              <View style={styles.interestsContainer}>
+                {user.interests.map(interest => (
+                  <View key={interest} style={styles.interestTag}>
+                    <Text style={styles.interestTagText}>{interest}</Text>
+                  </View>
+                ))}
+              </View>
+              
+              <Pressable style={styles.connectButton}>
+                <Text style={styles.connectButtonText}>Connect</Text>
+              </Pressable>
+            </View>
+          ))}
+        </ScrollView>
+        
+        <View style={styles.tabBar}>
+          <Pressable 
+            style={[styles.tabItem, currentScreen === 'discover' && styles.activeTab]} 
+            onPress={() => setCurrentScreen('discover')}
+          >
+            <Text style={styles.tabText}>Discover</Text>
+          </Pressable>
+          <Pressable 
+            style={styles.tabItem} 
+            onPress={() => setCurrentScreen('chat')}
+          >
+            <Text style={styles.tabText}>Chat</Text>
+          </Pressable>
+          <Pressable 
+            style={styles.tabItem} 
+            onPress={() => setCurrentScreen('profile')}
+          >
+            <Text style={styles.tabText}>Profile</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
+  // Render profile screen
+  if (currentScreen === 'profile') {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Profile</Text>
+        <Pressable style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        </Pressable>
+        
+        <View style={styles.tabBar}>
+          <Pressable 
+            style={styles.tabItem} 
+            onPress={() => setCurrentScreen('discover')}
+          >
+            <Text style={styles.tabText}>Discover</Text>
+          </Pressable>
+          <Pressable 
+            style={styles.tabItem} 
+            onPress={() => setCurrentScreen('chat')}
+          >
+            <Text style={styles.tabText}>Chat</Text>
+          </Pressable>
+          <Pressable 
+            style={[styles.tabItem, currentScreen === 'profile' && styles.activeTab]} 
+            onPress={() => setCurrentScreen('profile')}
+          >
+            <Text style={styles.tabText}>Profile</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
+  // Render chat screen (placeholder)
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Chat</Text>
+      <Text style={styles.subtitle}>Coming soon...</Text>
+      
+      <View style={styles.tabBar}>
+        <Pressable 
+          style={styles.tabItem} 
+          onPress={() => setCurrentScreen('discover')}
+        >
+          <Text style={styles.tabText}>Discover</Text>
+        </Pressable>
+        <Pressable 
+          style={[styles.tabItem, currentScreen === 'chat' && styles.activeTab]} 
+          onPress={() => setCurrentScreen('chat')}
+        >
+          <Text style={styles.tabText}>Chat</Text>
+        </Pressable>
+        <Pressable 
+          style={styles.tabItem} 
+          onPress={() => setCurrentScreen('profile')}
+        >
+          <Text style={styles.tabText}>Profile</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 40,
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 30,
+  },
+  form: {
+    padding: 20,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    fontSize: 16,
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  scrollView: {
+    flex: 1,
+    padding: 16,
+  },
+  card: {
+    backgroundColor: '#f8f8f8',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  cardSubtitle: {
+    color: '#666',
+    marginTop: 4,
+  },
+  cardText: {
+    marginTop: 8,
+    marginBottom: 12,
+  },
+  interestsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 12,
+  },
+  interestTag: {
+    backgroundColor: '#e0e0e0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  interestTagText: {
+    fontSize: 14,
+  },
+  connectButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  connectButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  tabBar: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  activeTab: {
+    borderTopWidth: 2,
+    borderTopColor: '#007AFF',
+  },
+  tabText: {
+    fontSize: 14,
+    color: '#007AFF',
+  },
+  logoutButton: {
+    backgroundColor: '#ff3b30',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    marginTop: 24,
+    marginHorizontal: 20,
+    alignItems: 'center',
+  },
+  logoutButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
