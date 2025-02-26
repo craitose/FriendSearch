@@ -7,6 +7,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 // Import screens
 import DiscoveryScreen from './screens/DiscoveryScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import ChatScreen from './screens/ChatScreen';
 
 // Simple Login Screen Component
 const LoginScreen = ({ navigation }) => {
@@ -20,15 +21,6 @@ const LoginScreen = ({ navigation }) => {
       >
         <Text style={styles.buttonText}>Log In</Text>
       </TouchableOpacity>
-    </View>
-  );
-};
-
-// Simple Chat Screen Component
-const ChatScreen = () => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Chat Screen</Text>
     </View>
   );
 };
