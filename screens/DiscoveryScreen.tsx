@@ -3,220 +3,50 @@ import {
   View, 
   Text, 
   StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
-  Image,
-  Modal,
+  TouchableOpacity,
   Alert
 } from 'react-native';
 
-function DiscoveryScreen({ navigation }) {
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [filterDistance, setFilterDistance] = useState(50);
-  const [connectedUsers, setConnectedUsers] = useState([]);
+function DiscoveryScreen() {
+  const [count, setCount] = useState(0);
 
-  // Hardcoded user data
-  const users = [
-    {
-      id: '1',
-      name: 'Sarah Johnson',
-      age: 28,
-      distance: 2.5,
-      bio: 'Passionate photographer looking for hiking buddies.',
-      interests: ['Hiking', 'Photography', 'Travel'],
-      maritalStatus: 'Married',
-      orientation: 'Straight',
-      profileImage: 'https://randomuser.me/api/portraits/women/44.jpg',
-    },
-    {
-      id: '2',
-      name: 'Michael Chen',
-      age: 34,
-      distance: 4.8,
-      bio: 'Tech enthusiast and gamer looking for friends.',
-      interests: ['Gaming', 'Movies', 'Technology'],
-      maritalStatus: 'Single',
-      orientation: 'Straight',
-      profileImage: 'https://randomuser.me/api/portraits/men/32.jpg',
-    },
-    {
-      id: '3',
-      name: 'Emily Rodriguez',
-      age: 31,
-      distance: 1.2,
-      bio: 'Foodie and art lover seeking creative friends.',
-      interests: ['Cooking', 'Art', 'Music'],
-      maritalStatus: 'Married',
-      orientation: 'Bisexual',
-      profileImage: 'https://randomuser.me/api/portraits/women/68.jpg',
-    },
-  ];
-
-  // Filter users by distance
-  const filteredUsers = users.filter(user => user.distance <= filterDistance);
-
-  // Function to handle connecting with a user
-  const connectWithUser = (userId) => {
-    console.log("Connecting with user:", userId);
-    
-    if (connectedUsers.includes(userId)) {
-      Alert.alert("Already Connected", "You are already connected with this user.");
-    } else {
-      const user = users.find(u => u.id === userId);
-      if (user) {
-        Alert.alert(
-          "Connect with User",
-          `Would you like to connect with ${user.name}?`,
-          [
-            { text: "Cancel", style: "cancel" },
-            { 
-              text: "Connect", 
-              onPress: () => {
-                console.log("User confirmed connection");
-                setConnectedUsers([...connectedUsers, userId]);
-                Alert.alert("Success", `Connection request sent to ${user.name}!`);
-              }
-            }
-          ]
-        );
-      }
-    }
+  const handleButtonPress = () => {
+    console.log("Button pressed");
+    setCount(count + 1);
+    Alert.alert("Button Pressed", `Count: ${count + 1}`);
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Discover Friends</Text>
-        <View style={styles.filterContainer}>
-          <Text style={styles.filterLabel}>Max Distance:</Text>
-          <View style={styles.filterOptions}>
-            {[5, 10, 25, 50].map(distance => (
-              <TouchableOpacity
-                key={distance}
-                style={[
-                  styles.filterOption,
-                  filterDistance === distance && styles.filterOptionSelected
-                ]}
-                onPress={() => setFilterDistance(distance)}
-              >
-                <Text style={styles.filterOptionText}>{distance}km</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </View>
+      <Text style={styles.title}>Discovery Screen</Text>
+      <Text style={styles.subtitle}>Testing Button Functionality</Text>
       
-      <ScrollView style={styles.scrollView}>
-        {filteredUsers.map(user => (
-          <View key={user.id} style={styles.card}>
-            <TouchableOpacity 
-              style={styles.cardContent}
-              onPress={() => {
-                setSelectedUser(user);
-                setShowModal(true);
-              }}
-            >
-              <View style={styles.cardHeader}>
-                <Image 
-                  source={{ uri: user.profileImage }} 
-                  style={styles.profileImage} 
-                />
-                <View style={styles.userInfo}>
-                  <Text style={styles.name}>{user.name}, {user.age}</Text>
-                  <Text style={styles.distance}>{user.distance} km away</Text>
-                </View>
-              </View>
-              
-              <Text style={styles.bio}>{user.bio}</Text>
-              
-              <View style={styles.interestsContainer}>
-                {user.interests.map(interest => (
-                  <View key={interest} style={styles.interestTag}>
-                    <Text style={styles.interestTagText}>{interest}</Text>
-                  </View>
-                ))}
-              </View>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[
-                styles.standardButton,
-                connectedUsers.includes(user.id) ? styles.connectedButton : styles.connectButton
-              ]}
-              onPress={() => {
-                console.log("Connect button pressed for user:", user.id);
-                connectWithUser(user.id);
-              }}
-            >
-              <Text style={styles.buttonText}>
-                {connectedUsers.includes(user.id) ? "Connected" : "Connect"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </ScrollView>
+      <Text style={styles.counter}>Count: {count}</Text>
       
-      {/* User Details Modal */}
-      <Modal
-        visible={showModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowModal(false)}
+      <TouchableOpacity 
+        style={styles.button}
+        onPress={handleButtonPress}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            {selectedUser && (
-              <>
-                <Image 
-                  source={{ uri: selectedUser.profileImage }} 
-                  style={styles.modalImage} 
-                />
-                <Text style={styles.modalName}>
-                  {selectedUser.name}, {selectedUser.age}
-                </Text>
-                <Text style={styles.modalDistance}>
-                  {selectedUser.distance} km away
-                </Text>
-                <Text style={styles.modalBio}>{selectedUser.bio}</Text>
-                
-                <Text style={styles.interestsTitle}>Interests</Text>
-                <View style={styles.interestsContainer}>
-                  {selectedUser.interests.map(interest => (
-                    <View key={interest} style={styles.interestTag}>
-                      <Text style={styles.interestTagText}>{interest}</Text>
-                    </View>
-                  ))}
-                </View>
-                
-                <View style={styles.modalButtons}>
-                  <TouchableOpacity 
-                    style={styles.closeButton}
-                    onPress={() => setShowModal(false)}
-                  >
-                    <Text style={styles.closeButtonText}>Close</Text>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity
-                    style={[
-                      styles.standardButton,
-                      connectedUsers.includes(selectedUser.id) ? styles.connectedButton : styles.connectButton
-                    ]}
-                    onPress={() => {
-                      console.log("Modal connect button pressed for user:", selectedUser.id);
-                      connectWithUser(selectedUser.id);
-                    }}
-                  >
-                    <Text style={styles.buttonText}>
-                      {connectedUsers.includes(selectedUser.id) ? "Connected" : "Connect"}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
-          </View>
-        </View>
-      </Modal>
+        <Text style={styles.buttonText}>Press Me</Text>
+      </TouchableOpacity>
+      
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Sarah Johnson, 28</Text>
+        <Text style={styles.cardSubtitle}>2.5 km away</Text>
+        
+        <TouchableOpacity 
+          style={styles.connectButton}
+          onPress={() => {
+            console.log("Connect button pressed");
+            Alert.alert("Connect", "Would you like to connect with Sarah?", [
+              { text: "Cancel", style: "cancel" },
+              { text: "Connect", onPress: () => Alert.alert("Success", "Connection request sent!") }
+            ]);
+          }}
+        >
+          <Text style={styles.connectButtonText}>Connect</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -224,182 +54,63 @@ function DiscoveryScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
-  },
-  header: {
+    padding: 20,
     backgroundColor: '#fff',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    alignItems: 'center',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginBottom: 8,
   },
-  filterContainer: {
-    marginTop: 8,
-  },
-  filterLabel: {
+  subtitle: {
     fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  filterOptions: {
-    flexDirection: 'row',
-  },
-  filterOption: {
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    marginRight: 8,
-  },
-  filterOptionSelected: {
-    backgroundColor: '#007AFF',
-  },
-  filterOptionText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  scrollView: {
-    flex: 1,
-    padding: 16,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  cardContent: {
-    marginBottom: 12,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    marginBottom: 12,
-  },
-  profileImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 12,
-  },
-  userInfo: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  distance: {
     color: '#666',
-    marginTop: 2,
+    marginBottom: 32,
   },
-  bio: {
-    marginBottom: 12,
-    color: '#333',
+  counter: {
+    fontSize: 18,
+    marginBottom: 16,
   },
-  interestsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 12,
-  },
-  interestTag: {
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  interestTagText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  standardButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  connectButton: {
+  button: {
     backgroundColor: '#007AFF',
-  },
-  connectedButton: {
-    backgroundColor: '#4CD964',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginBottom: 32,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
+  card: {
+    width: '100%',
+    backgroundColor: '#f8f8f8',
     borderRadius: 12,
-    padding: 20,
-    width: '90%',
-    maxHeight: '80%',
-  },
-  modalImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignSelf: 'center',
-    marginBottom: 16,
-  },
-  modalName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalDistance: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 4,
-    marginBottom: 16,
-  },
-  modalBio: {
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 16,
-  },
-  interestsTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  closeButton: {
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    flex: 1,
-    marginRight: 10,
+    padding: 16,
+    marginTop: 16,
     alignItems: 'center',
   },
-  closeButtonText: {
-    fontSize: 16,
-    color: '#333',
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 16,
+  },
+  connectButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  connectButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
