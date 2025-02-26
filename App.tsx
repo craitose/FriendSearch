@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { 
   View, 
   Text, 
@@ -6,45 +10,42 @@ import {
   Pressable, 
   TextInput,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
-// Simple App with direct state management
-export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+// Define the navigator types first
+type RootStackParamList = {
+  Login: undefined;
+  Register: undefined;
+  Main: undefined;
+};
+
+// Create the navigators before using them
+const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator();
+
+// Login Screen Component
+const LoginScreen = ({ onLogin, navigation }: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [activeTab, setActiveTab] = useState('Discover');
 
-  const handleLogin = () => {
+  const handleSubmit = () => {
     if (!email.trim() || !password.trim()) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-    setIsLoggedIn(true);
+    onLogin();
   };
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Confirm Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Logout', 
-          style: 'destructive',
-          onPress: () => {
-            setIsLoggedIn(false);
-            setActiveTab('Discover');
-          }
-        },
-      ]
-    );
-  };
-
-  // Login Screen
-  if (!isLoggedIn) {
-    return (
-      <View style={styles.container}>
+  return (
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>Welcome Back</Text>
         
         <View style={styles.form}>
@@ -55,6 +56,8 @@ export default function App() {
               value={email}
               onChangeText={setEmail}
               placeholder="Enter your email"
+              autoCapitalize="none"
+              keyboardType="email-address"
             />
           </View>
 
@@ -69,121 +72,213 @@ export default function App() {
             />
           </View>
 
-          <Pressable style={styles.button} onPress={handleLogin}>
+          <Pressable style={styles.button} onPress={handleSubmit}>
             <Text style={styles.buttonText}>Log In</Text>
           </Pressable>
-        </View>
-      </View>
-    );
-  }
 
-  // Main App with Tabs
+          <Pressable 
+            style={styles.registerButton}
+            onPress={() => navigation.navigate('Register')}
+          >
+            <Text style={styles.registerText}>
+              Don't have an account? Sign Up
+            </Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+};
+
+// Register Screen Component
+const RegisterScreen = ({ onLogin, navigation }: any) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const handleSubmit = () => {
+    const { name, email, password, confirmPassword } = formData;
+    
+    if (!name.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    onLogin();
+  };
+
   return (
-    <View style={styles.mainContainer}>
-      {/* Content Area */}
-      <View style={styles.content}>
-        {activeTab === 'Discover' && (
-          <View style={styles.tabContent}>
-            <Text style={styles.title}>Discover</Text>
-            <Text>Find friends nearby with similar interests</Text>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.title}>Create Account</Text>
+        
+        <View style={styles.form}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Name</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.name}
+              onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
+              placeholder="Enter your name"
+            />
           </View>
-        )}
-        
-        {activeTab === 'Chat' && (
-          <View style={styles.tabContent}>
-            <Text style={styles.title}>Chat</Text>
-            <Text>Your conversations will appear here</Text>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.email}
+              onChangeText={(text) => setFormData(prev => ({ ...prev, email: text }))}
+              placeholder="Enter your email"
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
           </View>
-        )}
-        
-        {activeTab === 'Profile' && (
-          <View style={styles.tabContent}>
-            <Text style={styles.title}>Profile</Text>
-            <Text style={styles.subtitle}>Welcome, User</Text>
-            
-            <Pressable 
-              style={styles.logoutButton} 
-              onPress={handleLogout}
-            >
-              <Text style={styles.logoutButtonText}>Logout</Text>
-            </Pressable>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.password}
+              onChangeText={(text) => setFormData(prev => ({ ...prev, password: text }))}
+              placeholder="Enter your password"
+              secureTextEntry
+            />
           </View>
-        )}
-      </View>
-      
-      {/* Tab Bar */}
-      <View style={styles.tabBar}>
-        <Pressable 
-          style={[styles.tab, activeTab === 'Discover' && styles.activeTab]} 
-          onPress={() => setActiveTab('Discover')}
-        >
-          <Text style={styles.tabText}>Discover</Text>
-        </Pressable>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Confirm Password</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.confirmPassword}
+              onChangeText={(text) => setFormData(prev => ({ ...prev, confirmPassword: text }))}
+              placeholder="Confirm your password"
+              secureTextEntry
+            />
+          </View>
+
+          <Pressable style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Create Account</Text>
+          </Pressable>
+
+          <Pressable 
+            style={styles.registerButton}
+            onPress={() => navigation.navigate('Login')}
+          >
+            <Text style={styles.registerText}>
+              Already have an account? Log In
+            </Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+};
+
+// Tab Screens
+const DiscoverScreen = () => (
+  <View style={styles.container}>
+    <Text style={styles.title}>Discover</Text>
+  </View>
+);
+
+const ChatScreen = () => (
+  <View style={styles.container}>
+    <Text style={styles.title}>Chat</Text>
+  </View>
+);
+
+const ProfileScreen = () => (
+  <View style={styles.container}>
+    <Text style={styles.title}>Profile</Text>
+  </View>
+);
+
+// Main Tab Navigator
+const MainTabs = () => (
+  <Tab.Navigator
+    screenOptions={({ route }) => ({
+      tabBarIcon: ({ focused, color, size }) => {
+        let iconName: keyof typeof MaterialIcons.glyphMap = 'person';
         
-        <Pressable 
-          style={[styles.tab, activeTab === 'Chat' && styles.activeTab]} 
-          onPress={() => setActiveTab('Chat')}
-        >
-          <Text style={styles.tabText}>Chat</Text>
-        </Pressable>
-        
-        <Pressable 
-          style={[styles.tab, activeTab === 'Profile' && styles.activeTab]} 
-          onPress={() => setActiveTab('Profile')}
-        >
-          <Text style={styles.tabText}>Profile</Text>
-        </Pressable>
-      </View>
-    </View>
+        if (route.name === 'Discover') {
+          iconName = focused ? 'people' : 'people-outline';
+        } else if (route.name === 'Chat') {
+          iconName = focused ? 'chat' : 'chat-outline';
+        } else if (route.name === 'Profile') {
+          iconName = focused ? 'person' : 'person-outline';
+        }
+
+        return <MaterialIcons name={iconName} size={size} color={color} />;
+      },
+      tabBarActiveTintColor: '#007AFF',
+      tabBarInactiveTintColor: 'gray',
+    })}
+  >
+    <Tab.Screen name="Discover" component={DiscoverScreen} />
+    <Tab.Screen name="Chat" component={ChatScreen} />
+    <Tab.Screen name="Profile" component={ProfileScreen} />
+  </Tab.Navigator>
+);
+
+// Main App Component
+export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  return (
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {!isAuthenticated ? (
+            <>
+              <Stack.Screen 
+                name="Login" 
+                component={(props) => <LoginScreen {...props} onLogin={handleLogin} />}
+              />
+              <Stack.Screen 
+                name="Register" 
+                component={(props) => <RegisterScreen {...props} onLogin={handleLogin} />}
+              />
+            </>
+          ) : (
+            <Stack.Screen name="Main" component={MainTabs} />
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
     backgroundColor: '#fff',
   },
-  mainContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  content: {
-    flex: 1,
-  },
-  tabContent: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
-  },
-  tabBar: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  activeTab: {
-    borderTopWidth: 2,
-    borderTopColor: '#007AFF',
-  },
-  tabText: {
-    color: '#333',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  subtitle: {
-    fontSize: 18,
-    marginBottom: 30,
+    marginBottom: 32,
+    textAlign: 'center',
   },
   form: {
     width: '100%',
@@ -209,25 +304,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     borderRadius: 8,
     marginTop: 24,
-    alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
   },
-  logoutButton: {
-    backgroundColor: '#ff3b30',
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-    marginTop: 24,
-    alignItems: 'center',
-    width: 200,
+  registerButton: {
+    marginTop: 16,
+    padding: 8,
   },
-  logoutButtonText: {
-    color: '#fff',
+  registerText: {
+    color: '#007AFF',
     fontSize: 16,
-    fontWeight: '600',
+    textAlign: 'center',
   },
 });
