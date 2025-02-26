@@ -1,72 +1,102 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 // Import screens
 import DiscoveryScreen from './screens/DiscoveryScreen';
 import ProfileScreen from './screens/ProfileScreen';
-import ChatScreen from './screens/ChatScreen';
 
-// Simple Login Screen
-function LoginScreen({ navigation }) {
+// Simple Login Screen Component
+const LoginScreen = ({ navigation }) => {
   return (
-    <View style={{
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 20,
-      backgroundColor: '#fff',
-    }}>
-      <Text style={{
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 32,
-      }}>Welcome Back</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Welcome Back</Text>
       
       <TouchableOpacity 
-        style={{
-          backgroundColor: '#007AFF',
-          paddingVertical: 12,
-          paddingHorizontal: 32,
-          borderRadius: 8,
-        }}
+        style={styles.button}
         onPress={() => navigation.navigate('Main')}
       >
-        <Text style={{
-          color: '#fff',
-          fontSize: 16,
-          fontWeight: '600',
-        }}>Log In</Text>
+        <Text style={styles.buttonText}>Log In</Text>
       </TouchableOpacity>
     </View>
   );
-}
+};
+
+// Simple Chat Screen Component
+const ChatScreen = () => {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Chat Screen</Text>
+    </View>
+  );
+};
 
 // Create navigators
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Main tabs
-function MainTabs() {
-  return (
-    <Tab.Navigator>
-      <Tab.Screen name="Discover" component={DiscoveryScreen} />
-      <Tab.Screen name="Chat" component={ChatScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
-    </Tab.Navigator>
-  );
-}
+// Main tabs navigator
+const MainTabsNavigator = () => (
+  <Tab.Navigator
+    screenOptions={({ route }) => ({
+      tabBarIcon: () => {
+        // Use text instead of icons
+        let label = '';
+        if (route.name === 'Discover') {
+          label = 'D';
+        } else if (route.name === 'Chat') {
+          label = 'C';
+        } else if (route.name === 'Profile') {
+          label = 'P';
+        }
+        return <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{label}</Text>;
+      },
+      tabBarActiveTintColor: '#007AFF',
+      tabBarInactiveTintColor: 'gray',
+    })}
+  >
+    <Tab.Screen name="Discover" component={DiscoveryScreen} />
+    <Tab.Screen name="Chat" component={ChatScreen} />
+    <Tab.Screen name="Profile" component={ProfileScreen} />
+  </Tab.Navigator>
+);
 
-// Main App
+// Main App Component
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Main" component={MainTabs} />
+        <Stack.Screen name="Main" component={MainTabsNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 32,
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
