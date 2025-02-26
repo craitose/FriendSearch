@@ -1,0 +1,65 @@
+import React from 'react';
+import { View, Text, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
+
+// Simple Discovery Screen
+const SimpleDiscoveryScreen = () => {
+  const users = [
+    { id: '1', name: 'Sarah Johnson', age: 28, distance: 2.5 },
+    { id: '2', name: 'Michael Chen', age: 34, distance: 4.8 },
+    { id: '3', name: 'Emily Rodriguez', age: 31, distance: 1.2 },
+  ];
+
+  return (
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Discover Friends</Text>
+      
+      {users.map(user => (
+        <View key={user.id} style={styles.card}>
+          <Text style={styles.name}>{user.name}, {user.age}</Text>
+          <Text style={styles.distance}>{user.distance} km away</Text>
+        </View>
+      ))}
+    </ScrollView>
+  );
+};
+
+// Main App Component
+export default function App() {
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <SimpleDiscoveryScreen />
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  card: {
+    backgroundColor: '#f8f8f8',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  distance: {
+    color: '#666',
+    marginTop: 4,
+  },
+});
