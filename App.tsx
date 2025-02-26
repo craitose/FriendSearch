@@ -10,9 +10,6 @@ import {
   Pressable, 
   TextInput,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -28,7 +25,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
 // Simple Login Screen
-const LoginScreen = ({ onLogin, navigation }: any) => {
+const LoginScreen = ({ onLogin }: { onLogin: () => void }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -75,10 +72,11 @@ const LoginScreen = ({ onLogin, navigation }: any) => {
 };
 
 // Simple Profile Screen
-const ProfileScreen = ({ onLogout }: any) => {
-  const [name, setName] = useState('John Doe');
+const ProfileScreen = ({ onLogout }: { onLogout: () => void }) => {
+  const [name] = useState('John Doe');
 
   const handleLogout = () => {
+    console.log("Logout button pressed");
     Alert.alert(
       'Confirm Logout',
       'Are you sure you want to logout?',
@@ -88,7 +86,8 @@ const ProfileScreen = ({ onLogout }: any) => {
           text: 'Logout', 
           style: 'destructive',
           onPress: () => {
-            if (onLogout) onLogout();
+            console.log("Logout confirmed, calling onLogout");
+            onLogout();
           }
         },
       ]
@@ -100,7 +99,10 @@ const ProfileScreen = ({ onLogout }: any) => {
       <Text style={styles.title}>Profile</Text>
       <Text style={styles.subtitle}>Welcome, {name}</Text>
       
-      <Pressable style={styles.logoutButton} onPress={handleLogout}>
+      <Pressable 
+        style={styles.logoutButton} 
+        onPress={handleLogout}
+      >
         <Text style={styles.logoutButtonText}>Logout</Text>
       </Pressable>
     </View>
@@ -122,6 +124,8 @@ const ChatScreen = () => (
 
 // Main Tab Navigator
 const MainTabs = ({ onLogout }: { onLogout: () => void }) => {
+  console.log("MainTabs rendered with onLogout function:", !!onLogout);
+  
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -144,8 +148,11 @@ const MainTabs = ({ onLogout }: { onLogout: () => void }) => {
     >
       <Tab.Screen name="Discover" component={DiscoverScreen} />
       <Tab.Screen name="Chat" component={ChatScreen} />
-      <Tab.Screen name="Profile">
-        {(props) => <ProfileScreen {...props} onLogout={onLogout} />}
+      <Tab.Screen 
+        name="Profile" 
+        options={{ headerShown: true }}
+      >
+        {() => <ProfileScreen onLogout={onLogout} />}
       </Tab.Screen>
     </Tab.Navigator>
   );
@@ -156,12 +163,16 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleLogin = () => {
+    console.log("Login successful");
     setIsAuthenticated(true);
   };
 
   const handleLogout = () => {
+    console.log("Logout function called in App.tsx");
     setIsAuthenticated(false);
   };
+
+  console.log("App rendered, isAuthenticated:", isAuthenticated);
 
   return (
     <SafeAreaProvider>
@@ -169,11 +180,11 @@ export default function App() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {!isAuthenticated ? (
             <Stack.Screen name="Login">
-              {(props) => <LoginScreen {...props} onLogin={handleLogin} />}
+              {() => <LoginScreen onLogin={handleLogin} />}
             </Stack.Screen>
           ) : (
             <Stack.Screen name="Main">
-              {(props) => <MainTabs {...props} onLogout={handleLogout} />}
+              {() => <MainTabs onLogout={handleLogout} />}
             </Stack.Screen>
           )}
         </Stack.Navigator>
@@ -237,6 +248,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 24,
     alignItems: 'center',
+    width: 200,
   },
   logoutButtonText: {
     color: '#fff',
