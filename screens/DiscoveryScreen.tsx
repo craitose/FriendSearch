@@ -7,24 +7,25 @@ import {
   TouchableOpacity, 
   Image,
   Modal,
-  Alert
+  Alert,
+  Button
 } from 'react-native';
 
 function DiscoveryScreen({ navigation }) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [filterDistance, setFilterDistance] = useState(50); // Default max distance: 50km
+  const [filterDistance, setFilterDistance] = useState(50);
   const [connectedUsers, setConnectedUsers] = useState([]);
 
-  // Hardcoded user data with more details
+  // Hardcoded user data
   const users = [
     {
       id: '1',
       name: 'Sarah Johnson',
       age: 28,
       distance: 2.5,
-      bio: 'Passionate photographer looking for hiking buddies and travel companions. I love exploring new trails and capturing beautiful landscapes.',
-      interests: ['Hiking', 'Photography', 'Travel', 'Nature'],
+      bio: 'Passionate photographer looking for hiking buddies.',
+      interests: ['Hiking', 'Photography', 'Travel'],
       maritalStatus: 'Married',
       orientation: 'Straight',
       profileImage: 'https://randomuser.me/api/portraits/women/44.jpg',
@@ -34,8 +35,8 @@ function DiscoveryScreen({ navigation }) {
       name: 'Michael Chen',
       age: 34,
       distance: 4.8,
-      bio: 'Tech enthusiast and gamer looking for friends to join movie nights and gaming sessions. Always up for trying new board games too!',
-      interests: ['Gaming', 'Movies', 'Technology', 'Board Games'],
+      bio: 'Tech enthusiast and gamer looking for friends.',
+      interests: ['Gaming', 'Movies', 'Technology'],
       maritalStatus: 'Single',
       orientation: 'Straight',
       profileImage: 'https://randomuser.me/api/portraits/men/32.jpg',
@@ -45,131 +46,39 @@ function DiscoveryScreen({ navigation }) {
       name: 'Emily Rodriguez',
       age: 31,
       distance: 1.2,
-      bio: 'Foodie and art lover seeking creative friends for cooking experiments and gallery visits. I also enjoy live music and theater.',
-      interests: ['Cooking', 'Art', 'Music', 'Theater'],
+      bio: 'Foodie and art lover seeking creative friends.',
+      interests: ['Cooking', 'Art', 'Music'],
       maritalStatus: 'Married',
       orientation: 'Bisexual',
       profileImage: 'https://randomuser.me/api/portraits/women/68.jpg',
-    },
-    {
-      id: '4',
-      name: 'David Kim',
-      age: 29,
-      distance: 3.7,
-      bio: 'Fitness enthusiast and bookworm looking for workout partners and book club members. I run 5k three times a week and love sci-fi novels.',
-      interests: ['Fitness', 'Reading', 'Running', 'Science Fiction'],
-      maritalStatus: 'Divorced',
-      orientation: 'Gay',
-      profileImage: 'https://randomuser.me/api/portraits/men/75.jpg',
-    },
-    {
-      id: '5',
-      name: 'Olivia Martinez',
-      age: 27,
-      distance: 5.3,
-      bio: 'Yoga instructor and plant enthusiast. Looking for friends to join meditation retreats and gardening projects.',
-      interests: ['Yoga', 'Gardening', 'Meditation', 'Sustainability'],
-      maritalStatus: 'Single',
-      orientation: 'Straight',
-      profileImage: 'https://randomuser.me/api/portraits/women/90.jpg',
     },
   ];
 
   // Filter users by distance
   const filteredUsers = users.filter(user => user.distance <= filterDistance);
 
-  const handleConnect = (userId, userName) => {
+  // Function to handle connecting with a user
+  const connectWithUser = (userId) => {
     if (connectedUsers.includes(userId)) {
+      Alert.alert("Already Connected", "You are already connected with this user.");
+    } else {
+      const user = users.find(u => u.id === userId);
       Alert.alert(
-        "Already Connected",
-        `You are already connected with ${userName}.`
-      );
-      return;
-    }
-    
-    Alert.alert(
-      "Connection Request",
-      `Would you like to connect with ${userName}?`,
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        { 
-          text: "Connect", 
-          onPress: () => {
-            // Add user to connected users
-            setConnectedUsers(prev => [...prev, userId]);
-            Alert.alert("Success", `Connection request sent to ${userName}!`);
+        "Connect with User",
+        `Would you like to connect with ${user.name}?`,
+        [
+          { text: "Cancel", style: "cancel" },
+          { 
+            text: "Connect", 
+            onPress: () => {
+              const newConnectedUsers = [...connectedUsers, userId];
+              setConnectedUsers(newConnectedUsers);
+              Alert.alert("Success", `Connection request sent to ${user.name}!`);
+            }
           }
-        }
-      ]
-    );
-  };
-
-  const openUserDetails = (user) => {
-    setSelectedUser(user);
-    setShowModal(true);
-  };
-
-  const handleCardConnect = (e, userId, userName) => {
-    e.stopPropagation(); // Prevent the card from opening
-    handleConnect(userId, userName);
-  };
-
-  const renderUserCard = (user) => {
-    const isConnected = connectedUsers.includes(user.id);
-    
-    return (
-      <View key={user.id} style={styles.card}>
-        <TouchableOpacity 
-          style={styles.cardContent}
-          onPress={() => openUserDetails(user)}
-          activeOpacity={0.8}
-        >
-          <View style={styles.cardHeader}>
-            <Image 
-              source={{ uri: user.profileImage }} 
-              style={styles.profileImage} 
-            />
-            <View style={styles.userInfo}>
-              <Text style={styles.name}>{user.name}, {user.age}</Text>
-              <Text style={styles.distance}>{user.distance} km away</Text>
-              <Text style={styles.statusInfo}>
-                {user.maritalStatus} • {user.orientation}
-              </Text>
-            </View>
-          </View>
-          
-          <Text style={styles.bio} numberOfLines={2}>{user.bio}</Text>
-          
-          <View style={styles.interestsContainer}>
-            {user.interests.slice(0, 3).map(interest => (
-              <View key={interest} style={styles.interestTag}>
-                <Text style={styles.interestTagText}>{interest}</Text>
-              </View>
-            ))}
-            {user.interests.length > 3 && (
-              <View style={styles.interestTag}>
-                <Text style={styles.interestTagText}>+{user.interests.length - 3}</Text>
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[
-            styles.connectButton,
-            isConnected && styles.connectedButton
-          ]}
-          onPress={(e) => handleCardConnect(e, user.id, user.name)}
-        >
-          <Text style={styles.connectButtonText}>
-            {isConnected ? 'Connected' : 'Connect'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    );
+        ]
+      );
+    }
   };
 
   return (
@@ -179,67 +88,61 @@ function DiscoveryScreen({ navigation }) {
         <View style={styles.filterContainer}>
           <Text style={styles.filterLabel}>Max Distance:</Text>
           <View style={styles.filterOptions}>
-            <TouchableOpacity
-              style={[
-                styles.filterOption,
-                filterDistance === 5 && styles.filterOptionSelected
-              ]}
-              onPress={() => setFilterDistance(5)}
-            >
-              <Text style={[
-                styles.filterOptionText,
-                filterDistance === 5 && styles.filterOptionTextSelected
-              ]}>5km</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.filterOption,
-                filterDistance === 10 && styles.filterOptionSelected
-              ]}
-              onPress={() => setFilterDistance(10)}
-            >
-              <Text style={[
-                styles.filterOptionText,
-                filterDistance === 10 && styles.filterOptionTextSelected
-              ]}>10km</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.filterOption,
-                filterDistance === 25 && styles.filterOptionSelected
-              ]}
-              onPress={() => setFilterDistance(25)}
-            >
-              <Text style={[
-                styles.filterOptionText,
-                filterDistance === 25 && styles.filterOptionTextSelected
-              ]}>25km</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.filterOption,
-                filterDistance === 50 && styles.filterOptionSelected
-              ]}
-              onPress={() => setFilterDistance(50)}
-            >
-              <Text style={[
-                styles.filterOptionText,
-                filterDistance === 50 && styles.filterOptionTextSelected
-              ]}>50km</Text>
-            </TouchableOpacity>
+            {[5, 10, 25, 50].map(distance => (
+              <TouchableOpacity
+                key={distance}
+                style={[
+                  styles.filterOption,
+                  filterDistance === distance && styles.filterOptionSelected
+                ]}
+                onPress={() => setFilterDistance(distance)}
+              >
+                <Text style={styles.filterOptionText}>{distance}km</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
       </View>
       
       <ScrollView style={styles.scrollView}>
-        {filteredUsers.length > 0 ? (
-          filteredUsers.map(renderUserCard)
-        ) : (
-          <View style={styles.noResultsContainer}>
-            <Text style={styles.noResultsText}>No matches found</Text>
-            <Text style={styles.noResultsSubtext}>Try increasing your distance filter</Text>
+        {filteredUsers.map(user => (
+          <View key={user.id} style={styles.card}>
+            <TouchableOpacity 
+              style={styles.cardContent}
+              onPress={() => {
+                setSelectedUser(user);
+                setShowModal(true);
+              }}
+            >
+              <View style={styles.cardHeader}>
+                <Image 
+                  source={{ uri: user.profileImage }} 
+                  style={styles.profileImage} 
+                />
+                <View style={styles.userInfo}>
+                  <Text style={styles.name}>{user.name}, {user.age}</Text>
+                  <Text style={styles.distance}>{user.distance} km away</Text>
+                </View>
+              </View>
+              
+              <Text style={styles.bio}>{user.bio}</Text>
+              
+              <View style={styles.interestsContainer}>
+                {user.interests.map(interest => (
+                  <View key={interest} style={styles.interestTag}>
+                    <Text style={styles.interestTagText}>{interest}</Text>
+                  </View>
+                ))}
+              </View>
+            </TouchableOpacity>
+            
+            <Button
+              title={connectedUsers.includes(user.id) ? "Connected" : "Connect"}
+              onPress={() => connectWithUser(user.id)}
+              color={connectedUsers.includes(user.id) ? "#4CD964" : "#007AFF"}
+            />
           </View>
-        )}
+        ))}
       </ScrollView>
       
       {/* User Details Modal */}
@@ -263,9 +166,6 @@ function DiscoveryScreen({ navigation }) {
                 <Text style={styles.modalDistance}>
                   {selectedUser.distance} km away
                 </Text>
-                <Text style={styles.modalStatus}>
-                  {selectedUser.maritalStatus} • {selectedUser.orientation}
-                </Text>
                 <Text style={styles.modalBio}>{selectedUser.bio}</Text>
                 
                 <Text style={styles.interestsTitle}>Interests</Text>
@@ -278,25 +178,16 @@ function DiscoveryScreen({ navigation }) {
                 </View>
                 
                 <View style={styles.modalButtons}>
-                  <TouchableOpacity 
-                    style={styles.closeButton}
+                  <Button
+                    title="Close"
                     onPress={() => setShowModal(false)}
-                  >
-                    <Text style={styles.closeButtonText}>Close</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={[
-                      styles.modalConnectButton,
-                      connectedUsers.includes(selectedUser.id) && styles.connectedButton
-                    ]}
-                    onPress={() => {
-                      handleConnect(selectedUser.id, selectedUser.name);
-                    }}
-                  >
-                    <Text style={styles.connectButtonText}>
-                      {connectedUsers.includes(selectedUser.id) ? 'Connected' : 'Connect'}
-                    </Text>
-                  </TouchableOpacity>
+                    color="#999"
+                  />
+                  <Button
+                    title={connectedUsers.includes(selectedUser.id) ? "Connected" : "Connect"}
+                    onPress={() => connectWithUser(selectedUser.id)}
+                    color={connectedUsers.includes(selectedUser.id) ? "#4CD964" : "#007AFF"}
+                  />
                 </View>
               </>
             )}
@@ -348,9 +239,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
-  filterOptionTextSelected: {
-    color: '#fff',
-  },
   scrollView: {
     flex: 1,
     padding: 16,
@@ -391,11 +279,6 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 2,
   },
-  statusInfo: {
-    color: '#666',
-    marginTop: 2,
-    fontSize: 12,
-  },
   bio: {
     marginBottom: 12,
     color: '#333',
@@ -416,35 +299,6 @@ const styles = StyleSheet.create({
   interestTagText: {
     fontSize: 14,
     color: '#333',
-  },
-  connectButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  connectedButton: {
-    backgroundColor: '#4CD964',
-  },
-  connectButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  noResultsContainer: {
-    alignItems: 'center',
-    padding: 40,
-  },
-  noResultsText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#666',
-  },
-  noResultsSubtext: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 8,
   },
   modalContainer: {
     flex: 1,
@@ -476,12 +330,6 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     marginTop: 4,
-  },
-  modalStatus: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 4,
     marginBottom: 16,
   },
   modalBio: {
@@ -498,28 +346,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
-  },
-  closeButton: {
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    flex: 1,
-    marginRight: 10,
-    alignItems: 'center',
-  },
-  closeButtonText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  modalConnectButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    flex: 1,
-    marginLeft: 10,
-    alignItems: 'center',
   },
 });
 
