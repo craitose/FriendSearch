@@ -1,133 +1,213 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  StyleSheet,
   View,
-  FlatList,
   Text,
-  Pressable,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
   Image,
 } from 'react-native';
-import { ChatService } from '../services/chatService';
-import { ChatRoom } from '../types/chat';
-import { AuthService } from '../services/authService';
 
-export const ChatListScreen = ({ navigation }: any) => {
-  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
-  const [currentUserId, setCurrentUserId] = useState<string>('');
+function ChatListScreen({ navigation }) {
+  // Mock data for chat conversations
+  const [conversations, setConversations] = useState([
+    {
+      id: '1',
+      user: {
+        id: '1',
+        name: 'Sarah Johnson',
+        profileImage: 'https://randomuser.me/api/portraits/women/44.jpg',
+      },
+      lastMessage: {
+        text: 'Are you free for a hike this weekend?',
+        timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
+        unread: true,
+      },
+    },
+    {
+      id: '2',
+      user: {
+        id: '2',
+        name: 'Michael Chen',
+        profileImage: 'https://randomuser.me/api/portraits/men/32.jpg',
+      },
+      lastMessage: {
+        text: 'I found a great new board game we should try!',
+        timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
+        unread: false,
+      },
+    },
+    {
+      id: '3',
+      user: {
+        id: '3',
+        name: 'Emily Rodriguez',
+        profileImage: 'https://randomuser.me/api/portraits/women/68.jpg',
+      },
+      lastMessage: {
+        text: 'Thanks for the restaurant recommendation!',
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3), // 3 hours ago
+        unread: false,
+      },
+    },
+  ]);
 
-  useEffect(() => {
-    loadCurrentUser();
-  }, []);
-
-  useEffect(() => {
-    if (currentUserId) {
-      loadChatRooms();
+  const formatTime = (date) => {
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    
+    // Less than 24 hours, show time
+    if (diff < 24 * 60 * 60 * 1000) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
-  }, [currentUserId]);
-
-  const loadCurrentUser = async () => {
-    const user = await AuthService.getUser();
-    if (user) {
-      setCurrentUserId(user.id);
-    }
+    
+    // More than 24 hours, show date
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
   };
 
-  const loadChatRooms = async () => {
-    const rooms = await ChatService.getChatRooms(currentUserId);
-    setChatRooms(rooms);
-  };
-
-  const renderChatRoom = ({ item }: { item: ChatRoom }) => {
-    const otherParticipantId = item.participants.find(id => id !== currentUserId);
-
-    return (
-      <Pressable
-        style={styles.chatRoom}
-        onPress={() => navigation.navigate('Chat', {
-          receiverId: otherParticipantId,
-          receiverName: 'User ' + otherParticipantId, // In a real app, fetch the actual user name
-        })}
-      >
-        <Image
-          style={styles.avatar}
-          source={{ uri: 'https://via.placeholder.com/50' }}
-        />
-        <View style={styles.chatInfo}>
-          <Text style={styles.userName}>User {otherParticipantId}</Text>
-          {item.lastMessage && (
-            <>
-              <Text style={styles.lastMessage} numberOfLines={1}>
-                {item.lastMessage.content}
-              </Text>
-              <Text style={styles.timestamp}>
-                {new Date(item.lastMessage.timestamp).toLocaleDateString()}
-              </Text>
-            </>
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.conversationItem}
+      onPress={() => navigation.navigate('ChatDetail', { 
+        userId: item.user.id,
+        name: item.user.name,
+        profileImage: item.user.profileImage,
+      })}
+    >
+      <Image
+        source={{ uri: item.user.profileImage }}
+        style={styles.avatar}
+      />
+      
+      <View style={styles.conversationContent}>
+        <View style={styles.conversationHeader}>
+          <Text style={styles.userName}>{item.user.name}</Text>
+          <Text style={styles.timestamp}>{formatTime(item.lastMessage.timestamp)}</Text>
+        </View>
+        
+        <View style={styles.messageContainer}>
+          <Text 
+            style={[
+              styles.lastMessage,
+              item.lastMessage.unread && styles.unreadMessage
+            ]}
+            numberOfLines={1}
+          >
+            {item.lastMessage.text}
+          </Text>
+          
+          {item.lastMessage.unread && (
+            <View style={styles.unreadBadge} />
           )}
         </View>
-      </Pressable>
-    );
-  };
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
-      {chatRooms.length > 0 ? (
+      <Text style={styles.title}>Messages</Text>
+      
+      {conversations.length > 0 ? (
         <FlatList
-          data={chatRooms}
+          data={conversations}
+          renderItem={renderItem}
           keyExtractor={item => item.id}
-          renderItem={renderChatRoom}
+          contentContainerStyle={styles.listContent}
         />
       ) : (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No conversations yet</Text>
+          <Text style={styles.emptySubtext}>
+            Connect with people to start chatting
+          </Text>
         </View>
       )}
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
-  chatRoom: {
-    flexDirection: 'row',
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
-    alignItems: 'center',
+  },
+  listContent: {
+    padding: 16,
+  },
+  conversationItem: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: '#f9f9f9',
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 16,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 12,
   },
-  chatInfo: {
+  conversationContent: {
     flex: 1,
+    justifyContent: 'center',
+  },
+  conversationHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
   },
   userName: {
     fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
+    fontWeight: 'bold',
+  },
+  timestamp: {
+    fontSize: 12,
+    color: '#666',
+  },
+  messageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   lastMessage: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 2,
+    flex: 1,
   },
-  timestamp: {
-    fontSize: 12,
-    color: '#999',
+  unreadMessage: {
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  unreadBadge: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#007AFF',
+    marginLeft: 8,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
     color: '#666',
+    textAlign: 'center',
   },
 });
+
+export default ChatListScreen;

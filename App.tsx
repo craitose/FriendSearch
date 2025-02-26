@@ -7,6 +7,8 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 // Import screens
 import DiscoveryScreen from './screens/DiscoveryScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import ChatListScreen from './screens/ChatListScreen';
+import ChatDetailScreen from './screens/ChatDetailScreen';
 
 // Simple Login Screen Component
 const LoginScreen = ({ navigation }) => {
@@ -24,18 +26,25 @@ const LoginScreen = ({ navigation }) => {
   );
 };
 
-// Simple Chat Screen Component
-const ChatScreen = () => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Chat Screen</Text>
-    </View>
-  );
-};
-
 // Create navigators
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+const ChatStack = createNativeStackNavigator();
+
+// Chat Stack Navigator
+const ChatStackNavigator = () => (
+  <ChatStack.Navigator>
+    <ChatStack.Screen 
+      name="ChatList" 
+      component={ChatListScreen} 
+      options={{ headerShown: false }}
+    />
+    <ChatStack.Screen 
+      name="ChatDetail" 
+      component={ChatDetailScreen}
+    />
+  </ChatStack.Navigator>
+);
 
 // Main tabs navigator
 const MainTabsNavigator = () => (
@@ -58,7 +67,11 @@ const MainTabsNavigator = () => (
     })}
   >
     <Tab.Screen name="Discover" component={DiscoveryScreen} />
-    <Tab.Screen name="Chat" component={ChatScreen} />
+    <Tab.Screen 
+      name="Chat" 
+      component={ChatStackNavigator} 
+      options={{ headerShown: false }}
+    />
     <Tab.Screen name="Profile" component={ProfileScreen} />
   </Tab.Navigator>
 );
