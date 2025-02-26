@@ -1,0 +1,25 @@
+<FlatList
+  data={conversations[activeChat.id]}
+  keyExtractor={item => item.id}
+  renderItem={({ item }) => (
+    <View style={[
+      styles.messageBubble,
+      item.sent ? styles.sentMessage : styles.receivedMessage
+    ]}>
+      <Text style={[
+        styles.messageText,
+        item.sent ? styles.sentMessageText : styles.receivedMessageText
+      ]}>
+        {item.text}
+      </Text>
+      <Text style={[
+        styles.messageTime,
+        item.sent ? styles.sentMessageTime : styles.receivedMessageTime
+      ]}>
+        {item.timestamp}
+      </Text>
+    </View>
+  )}
+  contentContainerStyle={styles.messageList}
+  inverted={false}
+/>
