@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Interests array for selection
 const INTERESTS = [
@@ -36,17 +37,48 @@ const ORIENTATION_OPTIONS = [
   { label: 'Other', value: 'other' },
 ];
 
-export const ProfileScreen = ({ navigation }: any) => {
-  const [profile, setProfile] = useState({
-    name: '',
-    age: '',
-    maritalStatus: 'single',
-    orientation: 'straight',
-    interests: [] as string[],
-    bio: '',
-    profileImage: null as string | null,
-  });
+// Initial profile data
+const initialProfile = {
+  name: 'John Doe',
+  age: '30',
+  maritalStatus: 'single',
+  orientation: 'straight',
+  interests: ['Hiking', 'Photography', 'Technology'],
+  bio: 'I love outdoor activities and technology. Looking for friends with similar interests!',
+  profileImage: null as string | null,
+};
+
+export const ProfileScreen = ({ navigation, onLogout }: any) => {
+  const [profile, setProfile] = useState(initialProfile);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      setIsLoading(true);
+      const savedProfile = await AsyncStorage.getItem('@user_profile');
+      if (savedProfile) {
+        setProfile(JSON.parse(savedProfile));
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const saveProfile = async (updatedProfile: typeof profile) => {
+    try {
+      await AsyncStorage.setItem('@user_profile', JSON.stringify(updatedProfile));
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      throw error;
+    }
+  };
 
   const pickImage = async () => {
     try {
@@ -64,7 +96,9 @@ export const ProfileScreen = ({ navigation }: any) => {
       });
 
       if (!result.canceled && result.assets[0]) {
-        setProfile(prev => ({ ...prev, profileImage: result.assets[0].uri }));
+        const updatedProfile = { ...profile, profileImage: result.assets[0].uri };
+        setProfile(updatedProfile);
+        await saveProfile(updatedProfile);
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to pick image');
@@ -72,30 +106,32 @@ export const ProfileScreen = ({ navigation }: any) => {
   };
 
   const toggleInterest = (interest: string) => {
-    setProfile(prev => ({
-      ...prev,
-      interests: prev.interests.includes(interest)
-        ? prev.interests.filter(i => i !== interest)
-        : [...prev.interests, interest],
-    }));
+    const updatedProfile = {
+      ...profile,
+      interests: profile.interests.includes(interest)
+        ? profile.interests.filter(i => i !== interest)
+        : [...profile.interests, interest],
+    };
+    setProfile(updatedProfile);
   };
 
   const handleSave = async () => {
     try {
-      setIsLoading(true);
+      setIsSaving(true);
       // Validate fields
       if (!profile.name.trim() || !profile.age) {
         Alert.alert('Error', 'Name and age are required');
+        setIsSaving(false);
         return;
       }
       
-      // Here you would typically save to a backend
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      // Save to AsyncStorage
+      await saveProfile(profile);
       Alert.alert('Success', 'Profile updated successfully');
     } catch (error) {
       Alert.alert('Error', 'Failed to update profile');
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -109,12 +145,20 @@ export const ProfileScreen = ({ navigation }: any) => {
           text: 'Logout', 
           style: 'destructive',
           onPress: () => {
-            // Handle logout logic here
+            if (onLogout) onLogout();
           }
         },
       ]
     );
   };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -244,9 +288,9 @@ export const ProfileScreen = ({ navigation }: any) => {
         <Pressable
           style={styles.saveButton}
           onPress={handleSave}
-          disabled={isLoading}
+          disabled={isSaving}
         >
-          {isLoading ? (
+          {isSaving ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.saveButtonText}>Save Profile</Text>
@@ -268,6 +312,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     alignItems: 'center',
