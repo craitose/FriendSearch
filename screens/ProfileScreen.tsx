@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 
-const ProfileScreen = ({ navigation }) => {
+// Use a named function declaration for clarity
+function ProfileScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Profile</Text>
@@ -14,7 +15,7 @@ const ProfileScreen = ({ navigation }) => {
       </Pressable>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -43,4 +44,5 @@ const styles = StyleSheet.create({
   },
 });
 
+// Make sure to use default export
 export default ProfileScreen;
