@@ -1,0 +1,55 @@
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+
+export default function App() {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Adult Friend Finder</Text>
+      <Text style={styles.subtitle}>Find friends with similar interests</Text>
+      
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Sarah Johnson, 28</Text>
+        <Text>2.5 km away</Text>
+        <Text>Interests: Hiking, Photography, Travel</Text>
+      </View>
+      
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Michael Chen, 34</Text>
+        <Text>4.8 km away</Text>
+        <Text>Interests: Gaming, Movies, Technology</Text>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 30,
+  },
+  card: {
+    width: '100%',
+    padding: 15,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+});
