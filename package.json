@@ -1,5 +1,5 @@
 {
-  "name": "user-app",
+  "name": "friendsearch",
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {

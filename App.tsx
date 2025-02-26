@@ -2,29 +2,14 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 
 // Import screens
 import DiscoveryScreen from './screens/DiscoveryScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import ChatListScreen from './screens/ChatListScreen';
 import ChatDetailScreen from './screens/ChatDetailScreen';
-
-// Simple Login Screen Component
-const LoginScreen = ({ navigation }) => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome Back</Text>
-      
-      <TouchableOpacity 
-        style={styles.button}
-        onPress={() => navigation.navigate('Main')}
-      >
-        <Text style={styles.buttonText}>Log In</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
+import LoginScreen from './screens/auth/LoginScreen';
 
 // Create navigators
 const Stack = createNativeStackNavigator();
@@ -87,29 +72,3 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 32,
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

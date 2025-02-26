@@ -1,8 +1,8 @@
 {
   "expo": {
     "owner": "appacella",
-    "name": "user-app",
-    "slug": "user-app",
+    "name": "FriendSearch",
+    "slug": "friendsearch",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,7 +17,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.appacella.userapp",
+      "package": "com.appacella.friendsearch",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/appacella-logo-white.png",
         "backgroundColor": "#ffffff"
@@ -26,6 +26,12 @@
     "web": {
       "bundler": "metro",
       "favicon": "./assets/images/favicon.png"
+    },
+    "scheme": "friendsearch",
+    "extra": {
+      "eas": {
+        "projectId": "fea28c7d-be14-411e-bddf-bd8140a6be29"
+      }
     }
   }
 }
