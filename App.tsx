@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
+import { View, Text } from 'react-native';
 
-// Import screens with default imports
+// Import screens
 import DiscoveryScreen from './screens/DiscoveryScreen';
 import ProfileScreen from './screens/ProfileScreen';
 
@@ -15,7 +14,7 @@ const LoginScreen = ({ navigation }) => {
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
       <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>Welcome Back</Text>
       
-      <Pressable 
+      <TouchableOpacity 
         style={{ 
           backgroundColor: '#007AFF', 
           paddingVertical: 12, 
@@ -26,28 +25,7 @@ const LoginScreen = ({ navigation }) => {
         onPress={() => navigation.navigate('Main')}
       >
         <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Log In</Text>
-      </Pressable>
-    </View>
-  );
-};
-
-// Simple Register Screen Component
-const RegisterScreen = ({ navigation }) => {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>Create Account</Text>
-      
-      <Pressable 
-        style={{ 
-          backgroundColor: '#007AFF', 
-          paddingVertical: 12, 
-          paddingHorizontal: 32, 
-          borderRadius: 8,
-        }}
-        onPress={() => navigation.navigate('Main')}
-      >
-        <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Sign Up</Text>
-      </Pressable>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -65,7 +43,7 @@ const ChatScreen = () => {
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Main tabs navigator with text labels instead of icons
+// Main tabs navigator
 const MainTabsNavigator = () => (
   <Tab.Navigator
     screenOptions={({ route }) => ({
@@ -94,14 +72,11 @@ const MainTabsNavigator = () => (
 // Main App Component
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="Main" component={MainTabsNavigator} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Main" component={MainTabsNavigator} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
